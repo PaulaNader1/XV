@@ -21,9 +21,5 @@ const knowledgeBaseModel = new mongoose.Schema(
      
     );
     
-<<<<<<< HEAD
- module.exports = mongoose.model('try2.js', knowledgeBaseModel);
-=======
  module.exports = mongoose.model('knowledgeBaseModel.js', knowledgeBaseModel);
->>>>>>> cc1c9f0f25be169bd15aaa874d27bd157891ee81
  module.exports.Schema = knowledgeBaseModel;  
