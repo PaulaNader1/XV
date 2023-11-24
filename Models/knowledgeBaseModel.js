@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const knowledgeBaseModel = new mongoose.Schema( 
     {
         title: {
