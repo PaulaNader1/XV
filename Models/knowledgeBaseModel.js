@@ -21,5 +21,5 @@ const knowledgeBaseModel = new mongoose.Schema(
      
     );
     
- module.exports = mongoose.model('knowledgeBaseModel.js', knowledgeBaseModel);
+ module.exports = mongoose.model('knowledgeBaseModel', knowledgeBaseModel);
  module.exports.Schema = knowledgeBaseModel;  
