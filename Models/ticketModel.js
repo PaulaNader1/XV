@@ -1,7 +1,7 @@
 // models/Ticket.js
 const mongoose = require('mongoose');
 
-const ticketSchema = new mongoose.Schema({
+const ticketModel = new mongoose.Schema({
     ticketid: { type: int, required: true, uniqu: true },
     userid: { type: int, required: true },
     issueinfo: { type: String, required: true },
