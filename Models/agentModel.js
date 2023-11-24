@@ -4,7 +4,7 @@ const agentModel = new mongoose.Schema(
     {
         agentId: {
           type: String,
-          requierd:true
+          required:true
         },
         username: {
           type: String,
