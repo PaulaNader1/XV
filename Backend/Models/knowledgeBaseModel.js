@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const knowledgeBaseModel = new mongoose.Schema( 
     {
         title: {
@@ -21,5 +22,5 @@ const knowledgeBaseModel = new mongoose.Schema(
      
     );
     
- module.exports = mongoose.model('knowledgeBaseModel.js', knowledgeBaseModel);
+ module.exports = mongoose.model('knowledgeBaseModel', knowledgeBaseModel);
  module.exports.Schema = knowledgeBaseModel;  
