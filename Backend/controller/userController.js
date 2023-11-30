@@ -1,14 +1,15 @@
 const userModel = require("../Models/userModel");
-const productModel = require("../Models/productModel");
-const sessionModel = require("../Models/sessionModel");
+const ticketModel = require("../Models/ticketModel");
+const knowledgeBaseModel = require("../Models/knowledgeBaseModel");
+//const sessionModel = require("../Models/sessionModel");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const secretKey =process.env.SECRET_KEY ;
 const bcrypt = require("bcrypt");
 const userController = {
-  register: async (req, res) => {
+  register: async (req, res) => {            // ready
     try {
-      const { email, password, displayName, role } = req.body;
+      const { email, password, username, role } = req.body;
 
       // Check if the user already exists
       const existingUser = await userModel.findOne({ email });
@@ -23,7 +24,7 @@ const userController = {
       const newUser = new userModel({
         email,
         password: hashedPassword,
-        displayName,
+        username,
         role,
       });
 
@@ -84,7 +85,7 @@ const userController = {
       res.status(500).json({ message: "Server error" });
     }
   },
-  getAllUsers: async (req, res) => {
+  getAllUsers: async (req, res) => {            // ready
     try {
       const users = await userModel.find();
       return res.status(200).json(users);
@@ -122,55 +123,170 @@ const userController = {
       return res.status(500).json({ message: error.message });
     }
   },
-  getShoppingCart: async (req, res) => {
+
+  createTicket: async (req, res) =>{
     try {
-      const user = await userModel.findById(req.params.id);
-      return res.status(200).json(user.shoppingCart);
+      const {
+        userid,
+        issueinfo,
+        category,
+        subCategory,
+        priority,
+      } = req.body;
+  
+      // Create a new ticket
+      const newTicket = new ticketModel({
+        userid,
+        issueinfo,
+        category,
+        subCategory,
+        priority,
+        date: new Date(),
+        status: false, // Assuming a new ticket is initially not resolved
+      });
+  
+      // Save the ticket to the database
+      await newTicket.save();
+  
+      res.status(201).json({ message: "Ticket created successfully" });
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      console.error("Error creating ticket:", error);
+      res.status(500).json({ message: "Server error" });
     }
   },
-  addToCart: async (req, res) => {
+
+  createKnowledgeBase: async (req, res) =>{
     try {
-      const user = await userModel.findById(req.params.id);
-      const product = await productModel.findById(req.params.productid);
-      user.shoppingCart.push(product);
-      const newUser = await user.save(); // save here works as update
-      return res.status(201).json(newUser);
-    } catch (e) {
-      return res.status(400).json({ message: e.message });
+      const { title, category, subCategory, answer } = req.body;
+  
+      const newKnowledgeBaseEntry = new knowledgeBaseModel({
+        title,
+        category,
+        subCategory,
+        answer,
+      });
+  
+      await newKnowledgeBaseEntry.save();
+  
+      res.status(201).json({ message: "Knowledge Base entry created successfully" });
+    } catch (error) {
+      console.error("Error creating Knowledge Base entry:", error);
+      res.status(500).json({ message: "Server error" });
     }
   },
-  removeFromCart: async (req, res) => {
+
+  getAllKnowledgeBase: async (req, res) => {
     try {
-      const user = await userModel.findById(req.params.id);
-      const product = await productModel.findById(req.params.productid);
-      user.shoppingCart.pull(product);
-      const newUser = await user.save();
-      return res.status(201).json(newUser);
-    } catch (e) {
-      return res.status(400).json({ message: e.message });
+      const knowledgeBaseEntries = await knowledgeBaseModel.find();
+  
+      res.status(200).json({ knowledgeBaseEntries });
+    } catch (error) {
+      console.error("Error getting Knowledge Base entries:", error);
+      res.status(500).json({ message: "Server error" });
     }
   },
-  checkout: async (req, res) => {
+
+  getKnowledgeBaseByCategory: async (req, res) => {
     try {
-      const user = await userModel.findById(req.params.id);
-      const total = user.shoppingCart.reduce(
-        (total, product) => total + product.price,
-        0
-      );
-      await userModel.findByIdAndUpdate(
+      const { category } = req.params;
+      const knowledgeBaseEntries = await knowledgeBaseModel.find({ category });
+  
+      res.status(200).json({ knowledgeBaseEntries });
+    } catch (error) {
+      console.error("Error getting Knowledge Base entries by category:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+
+  getKnowledgeBaseBySubCategory: async (req, res) => {
+    try {
+      const { subcategory } = req.params;
+      const knowledgeBaseEntries = await knowledgeBaseModel.find({ subCategory: subcategory });
+  
+      res.status(200).json({ knowledgeBaseEntries });
+    } catch (error) {
+      console.error("Error getting Knowledge Base entries by subcategory:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+
+  getKnowledgeBaseBytitle: async (req, res) => {
+    try {
+      const { title } = req.params;
+      const knowledgeBaseEntries = await knowledgeBaseModel.find({ title: title });
+  
+      res.status(200).json({ knowledgeBaseEntries });
+    } catch (error) {
+      console.error("Error getting Knowledge Base entries by subcategory:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+
+  rateTicket: async (req, res) => {
+
+    try {
+      const user = await userModel.findByIdAndUpdate(
         req.params.id,
-        { shoppingCart: [] },
+        { name: req.body.name },
         {
           new: true,
         }
       );
-      console.log(total);
-      return res.status(200).json(total);
+      return res.status(200).json({ user, msg: "User updated successfully" });
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
   },
+
+  // getShoppingCart: async (req, res) => {
+  //   try {
+  //     const user = await userModel.findById(req.params.id);
+  //     return res.status(200).json(user.shoppingCart);
+  //   } catch (error) {
+  //     return res.status(500).json({ message: error.message });
+  //   }
+  // },
+  // addToCart: async (req, res) => {
+  //   try {
+  //     const user = await userModel.findById(req.params.id);
+  //     const product = await productModel.findById(req.params.productid);
+  //     user.shoppingCart.push(product);
+  //     const newUser = await user.save(); // save here works as update
+  //     return res.status(201).json(newUser);
+  //   } catch (e) {
+  //     return res.status(400).json({ message: e.message });
+  //   }
+  // },
+  // removeFromCart: async (req, res) => {
+  //   try {
+  //     const user = await userModel.findById(req.params.id);
+  //     const product = await productModel.findById(req.params.productid);
+  //     user.shoppingCart.pull(product);
+  //     const newUser = await user.save();
+  //     return res.status(201).json(newUser);
+  //   } catch (e) {
+  //     return res.status(400).json({ message: e.message });
+  //   }
+  // },
+  // checkout: async (req, res) => {
+  //   try {
+  //     const user = await userModel.findById(req.params.id);
+  //     const total = user.shoppingCart.reduce(
+  //       (total, product) => total + product.price,
+  //       0
+  //     );
+  //     await userModel.findByIdAndUpdate(
+  //       req.params.id,
+  //       { shoppingCart: [] },
+  //       {
+  //         new: true,
+  //       }
+  //     );
+  //     console.log(total);
+  //     return res.status(200).json(total);
+  //   } catch (error) {
+  //     return res.status(500).json({ message: error.message });
+  //   }
+  // },
 };
 module.exports = userController;
