@@ -115,7 +115,7 @@ const adminController = {
             return res.status(500).json({ error: 'Internal server error' });
         }
     },
-
+              //table customization we ne retrieve data we n update meno
     changeCustomization: async (req, res) => {
         try {
             if (!req.user || req.user.role !== 'admin') {
