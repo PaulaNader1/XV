@@ -1,5 +1,6 @@
 const User = require('../Models/userModel');
 const Agent = require('../Models/agentModel');
+const changeCustomization = require('../Models/customizationModel');
 
 const adminController = {
     createNewUser: async (req, res) => {
@@ -115,17 +116,29 @@ const adminController = {
             return res.status(500).json({ error: 'Internal server error' });
         }
     },
-              //table customization we ne retrieve data we n update meno
+              
     changeCustomization: async (req, res) => {
         try {
             if (!req.user || req.user.role !== 'admin') {
-                return res.status(403).json({ error: 'unauthorized' });
+                return res.status(403).json({ error: 'Unauthorized' });
             }
             const { colors, companyName, logo } = req.body;
 
+            // Retrieve existing customization data
+            let customization = await CustomizationModel.findOne();
+
+            if (!customization) {
+                return res.status(404).json({ error: 'No existing customization data found' });
+            }
+
+            // Update existing customization
+            customization.colors = colors;
+            customization.companyName = companyName;
+            customization.logo = logo;
+            await customization.save();
+
             return res.status(200).json({ message: 'Help Desk customization updated successfully' });
-        }
-        catch (error) {
+        } catch (error) {
             console.error(error);
             return res.status(500).json({ error: 'Internal server error' });
         }
