@@ -1,13 +1,9 @@
 // models/User.js
 const mongoose = require("mongoose");
-const schemaOptions = {
-  strict: false,
-  timestamps: true,
-};
 
 const userSchema = new mongoose.Schema(
   {
-    userid: { type: int, unique: true },
+    userid: { type: Number, unique: true },
     username: { type: String, required: true },
     password: { type: String, required: true, minlength: 8 },
     email: { type: String, required: true, unique: true },

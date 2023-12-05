@@ -168,25 +168,25 @@ const userController = {
     }
   },
 
-  createKnowledgeBase: async (req, res) => {
-    try {
-      const { title, category, subCategory, answer } = req.body;
+  // createKnowledgeBase: async (req, res) => {
+  //   try {
+  //     const { title, category, subCategory, answer } = req.body;
 
-      const newKnowledgeBaseEntry = new knowledgeBaseModel({
-        title,
-        category,
-        subCategory,
-        answer,
-      });
+  //     const newKnowledgeBaseEntry = new knowledgeBaseModel({
+  //       title,
+  //       category,
+  //       subCategory,
+  //       answer,
+  //     });
 
-      await newKnowledgeBaseEntry.save();
+  //     await newKnowledgeBaseEntry.save();
 
-      res.status(201).json({ message: "Knowledge Base entry created successfully" });
-    } catch (error) {
-      console.error("Error creating Knowledge Base entry:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  },
+  //     res.status(201).json({ message: "Knowledge Base entry created successfully" });
+  //   } catch (error) {
+  //     console.error("Error creating Knowledge Base entry:", error);
+  //     res.status(500).json({ message: "Server error" });
+  //   }
+  // },
 
   getAllKnowledgeBase: async (req, res) => {
     try {
@@ -201,7 +201,7 @@ const userController = {
 
   getKnowledgeBaseByCategory: async (req, res) => {
     try {
-      const { category } = req.params;
+      const { category } = req.body;
       const knowledgeBaseEntries = await knowledgeBaseModel.find({ category });
 
       res.status(200).json({ knowledgeBaseEntries });
@@ -213,7 +213,7 @@ const userController = {
 
   getKnowledgeBaseBySubCategory: async (req, res) => {
     try {
-      const { subcategory } = req.params;
+      const { subcategory } = req.body;
       const knowledgeBaseEntries = await knowledgeBaseModel.find({ subCategory: subcategory });
 
       res.status(200).json({ knowledgeBaseEntries });
