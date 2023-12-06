@@ -3,29 +3,29 @@ const router = express.Router();
 const userController = require("../controller/userController");
 const authorizationMiddleware=require('../Middleware/authorizationMiddleware')
 
-// * Get all users
-router.get("/",  authorizationMiddleware(['admin']),userController.getAllUsers);
+// // * Get all users
+// router.get("/",  authorizationMiddleware(['admin']),userController.getAllUsers);
 
-// * Get one user
-router.get("/:id", authorizationMiddleware(['admin','customer']), userController.getUser);
+// // * Get one user
+// router.get("/:id", authorizationMiddleware(['admin','customer']), userController.getUser);
 
-// * Update one user
-router.put("/:id",  authorizationMiddleware(['admin','customer']),userController.updateUser);
+// // * Update one user
+// router.put("/:id",  authorizationMiddleware(['admin','customer']),userController.updateUser);
 
-// * Delete one user
-router.delete("/:id", authorizationMiddleware(['admin']), userController.deleteUser);
+// // * Delete one user
+// router.delete("/:id", authorizationMiddleware(['admin']), userController.deleteUser);
 
-// get shopping cart
-router.get("/cart/:id",  authorizationMiddleware(['admin','customer']),userController.getShoppingCart);
+// // get shopping cart
+// router.get("/cart/:id",  authorizationMiddleware(['admin','customer']),userController.getShoppingCart);
 
-//* add to cart
-router.put("/addTocart/:id/:productid", authorizationMiddleware(['admin','customer']), userController.addToCart);
+// //* add to cart
+// router.put("/addTocart/:id/:productid", authorizationMiddleware(['admin','customer']), userController.addToCart);
 
-//* remove from cart
-router.put("/removeFromcart/:id/:productid",  authorizationMiddleware(['admin','customer']), userController.removeFromCart);
+// //* remove from cart
+// router.put("/removeFromcart/:id/:productid",  authorizationMiddleware(['admin','customer']), userController.removeFromCart);
 
-//*checkout
-router.get("/checkout/:id", authorizationMiddleware(['admin','customer']), userController.checkout);
+// //*checkout
+// router.get("/checkout/:id", authorizationMiddleware(['admin','customer']), userController.checkout);
 
 //------------using router.route()-----------------
 
@@ -37,7 +37,7 @@ router.get("/checkout/:id", authorizationMiddleware(['admin','customer']), userC
 //   .put(userController.updateUser)
 //   .delete(userController.deleteUser);
 
-module.exports = router;
+// module.exports = router;
 
 // const authenticationMiddleware = require('../middleware/authenticationMiddleware');
 
