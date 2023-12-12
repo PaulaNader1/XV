@@ -33,7 +33,7 @@ const userController = {
       res.status(201).json({ message: "User registered successfully" });
     } catch (error) {
       console.error("Error registering user:", error);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: "Server error", error: error.message });
     }
   },
 
@@ -59,7 +59,7 @@ const userController = {
       const expiresAt = new Date(+currentDateTime + 1800000); // expire in 3 minutes
       // Generate a JWT token
       const token = jwt.sign(
-        { user: { userid: user.userid, role: user.role } },
+        { user: { userid: user._id, role: user.role } },
         secretKey,
         {
           expiresIn: 3 * 60 * 60,
@@ -119,10 +119,10 @@ const userController = {
     }
   },
 
-  updatePassword: async (req, res) => {
+  updatePassword: async (req, res) => {              //#################ERROR####################
     try {
       
-      const {password} = req.body.password;
+      const {password} = req.body;
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = await userModel.findByIdAndUpdate(
         req.params.id,
@@ -137,15 +137,16 @@ const userController = {
     }
   },
 
-  createTicket: async (req, res) => {
+  createTicket: async (req, res) => {             //#################ERROR####################
     try {
       const {
-        userid,
         issueinfo,
         category,
         subCategory,
         priority,
       } = req.body;
+
+      const userid = req.params.id;
 
       // Create a new ticket
       const newTicket = new ticketModel({
@@ -155,7 +156,7 @@ const userController = {
         subCategory,
         priority,
         date: new Date(),
-        status: false, // Assuming a new ticket is initially not resolved
+        status: "false", // Assuming a new ticket is initially not resolved
       });
 
       // Save the ticket to the database
@@ -164,7 +165,7 @@ const userController = {
       res.status(201).json({ message: "Ticket created successfully" });
     } catch (error) {
       console.error("Error creating ticket:", error);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: "Server error", error: error.message });
     }
   },
 

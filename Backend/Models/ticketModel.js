@@ -2,12 +2,12 @@
 const mongoose = require('mongoose');
 
 const ticketModel = new mongoose.Schema({
-    ticketid: { type: Number, required: true, uniqu: true },
-    userid: { type: Number, required: true },
+    // ticketid: { type: Number, unique: true },
+    userid: { type: String },
     issueinfo: { type: String, required: true },
     agentResponse:{type: String},
     status:{type: String} ,
-    agentid:{type: Number}  ,
+    agentid:{type: String}  ,
     category: { type: String, required: true },
     subCategory: {type: String, required: true},
     priority: { type: String, required: true },
