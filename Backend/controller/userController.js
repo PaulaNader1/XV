@@ -86,23 +86,23 @@ const userController = {
     }
   },
 
-  getAllUsers: async (req, res) => {            // ready
-    try {
-      const users = await userModel.find();
-      return res.status(200).json(users);
-    } catch (e) {
-      return res.status(500).json({ message: e.message });
-    }
-  },
+  // getAllUsers: async (req, res) => {            // ready
+  //   try {
+  //     const users = await userModel.find();
+  //     return res.status(200).json(users);
+  //   } catch (e) {
+  //     return res.status(500).json({ message: e.message });
+  //   }
+  // },
 
-  getUser: async (req, res) => {
-    try {
-      const user = await userModel.findById(req.params.id);
-      return res.status(200).json(user);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
-  },
+  // getUser: async (req, res) => {
+  //   try {
+  //     const user = await userModel.findById(req.params.id);
+  //     return res.status(200).json(user);
+  //   } catch (error) {
+  //     return res.status(500).json({ message: error.message });
+  //   }
+  // },
 
   updateUserName: async (req, res) => {
     try {
@@ -119,7 +119,7 @@ const userController = {
     }
   },
 
-  updatePassword: async (req, res) => {              //#################ERROR####################
+  updatePassword: async (req, res) => {           
     try {
       
       const {password} = req.body;
@@ -137,7 +137,7 @@ const userController = {
     }
   },
 
-  createTicket: async (req, res) => {             //#################ERROR####################
+  createTicket: async (req, res) => {           
     try {
       const {
         issueinfo,
@@ -156,6 +156,7 @@ const userController = {
         subCategory,
         priority,
         date: new Date(),
+        // responserating: null,
         status: "false", // Assuming a new ticket is initially not resolved
       });
 
@@ -243,31 +244,35 @@ const userController = {
       const { responserating } = req.body;
 
       // Validate the rating (assuming a rating between 1 and 5)
-      if (responserating < 0 || responserating > 5) {
+      if (responserating < 1 || responserating > 5) {
         return res.status(400).json({ message: "Invalid rating. Please provide a rating between 0 and 5" });
       }
 
+      const ticket = await ticketModel.findById(ticketId);
+
       // Check if the ticket exists
-      if (!updatedTicket) {
+      if (!ticket) {
         return res.status(404).json({ message: "Ticket not found" });
       }
 
       // Check if the ticket has already been rated
-      if (updatedTicket.responserating !== null) {
+      if (ticket.responserating !== 0) {
         return res.status(400).json({ message: "Ticket has already been rated" });
       }
+      ticket.responserating = responserating;
+      await ticket.save();
 
       // Update the ticket with the rating using findByIdAndUpdate
-      const updatedTicket = await ticketModel.findByIdAndUpdate(
+      /*const updatedTicket = await ticketModel.findByIdAndUpdate(
         ticketId,
         { responserating: { responserating } },
         { new: true } // Returns the updated document
-      );
+      );*/
 
-      res.status(200).json({ message: "Ticket rated successfully", ticket: updatedTicket });
+      res.status(200).json({ message: "Ticket rated successfully", ticket });
     } catch (error) {
       console.error("Error rating ticket:", error);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: "Server error", error: error.message  });
     }
   },
 

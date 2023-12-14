@@ -2,7 +2,6 @@
 const mongoose = require('mongoose');
 
 const ticketModel = new mongoose.Schema({
-    // ticketid: { type: Number, unique: true },
     userid: { type: String },
     issueinfo: { type: String, required: true },
     agentResponse:{type: String},
@@ -13,7 +12,7 @@ const ticketModel = new mongoose.Schema({
     priority: { type: String, required: true },
     date: {type: Date},
     responsedate: {type: Date},
-    responserating: {type: Number},
+    responserating: {type: Number, default: 0},
 
     
     

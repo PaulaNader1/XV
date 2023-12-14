@@ -5,7 +5,7 @@ const authorizationMiddleware=require('../Middleware/authorizationMiddleware')
 
 
 // Get User by ID
-router.get('/users/:id', authorizationMiddleware(['admin', 'user']), userController.getUser);
+// router.get('/users/:id', authorizationMiddleware(['admin', 'user']), userController.getUser);
 
 // Update User Name
 router.put('/users/:id/update-username', authorizationMiddleware(['user']), userController.updateUserName);
