@@ -25,8 +25,8 @@ router.get('/knowledgebase', authorizationMiddleware(['user']), userController.g
 // Get Knowledge Base Entries by Category
 router.get('/knowledgebase/category', authorizationMiddleware(['user']), userController.getKnowledgeBaseByCategory);
 
-//*checkout
-router.get("/checkout/:id", authorizationMiddleware(['admin','customer']), userController.checkout);
+// Get Knowledge Base Entries by SubCategory
+router.get('/knowledgebase/subcategory', authorizationMiddleware(['user']), userController.getKnowledgeBaseBySubCategory);
 
 // Get Knowledge Base Entries by Title
 router.get('/knowledgebase/title', authorizationMiddleware(['user']), userController.getKnowledgeBaseBytitle);

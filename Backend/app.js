@@ -26,7 +26,6 @@ app.use(
 
 app.use("/api/v1", authRouter);
 app.use(authenticationMiddleware);
-//app.use("/api/v1/products", productRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admins",adminRouter);
 

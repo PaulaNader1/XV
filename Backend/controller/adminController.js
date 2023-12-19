@@ -1,6 +1,5 @@
 const userModel = require('../Models/userModel');
 const agentModel = require('../Models/agentModel');
-const sessionModel = require("../Models/sessionModel");
 const customizationModel = require('../Models/customizationModel');
 const jwt = require("jsonwebtoken");
 const secretKey = "s1234rf,.lp";
