@@ -50,24 +50,20 @@ const adminController = {
             }
     
             
-            const {userid,newRole, primaryCategory } = req.body;
+            const {email,newRole, primaryCategory } = req.body;
     
             if (newRole === 'agent' && primaryCategory== null) {
                 return res.status(400).json({ error: 'Primary category is required for an agent' });
             }
     
-            const user = await userModel.findOne({_id: userid});
+            const user = await userModel.findOne({email});
     
             if (!user) {
                 return res.status(402).json({ error: 'User not found' });
             }
             user.role = newRole;
     
-            const updatedUser = await userModel.findByIdAndUpdate(
-                userid,
-                { role: newRole },
-                { new: true }
-            );
+            await user.save();
     
             if (newRole === 'agent') {
                 const newAgent = await agentModel.create({
@@ -81,7 +77,7 @@ const adminController = {
                 console.log('New Agent created:', savedAgent);
             }
     
-            return res.status(200).json({ message: 'User role updated successfully', user: updatedUser });
+            return res.status(200).json({ message: 'User role updated successfully', user });
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error: 'Internal server error' });
@@ -96,17 +92,17 @@ const adminController = {
                 return res.status(403).json({ error: 'Unauthorized' });
             }
 
-            const { username } = req.body;
-            const user = await userModel.findOne({ username });
+            const { email } = req.body;
+            const user = await userModel.findOne({ email });
 
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
 
-            await userModel.findOneAndDelete({ username });
+            await userModel.findOneAndDelete({ email });
 
             if (user.role === 'agent') {
-                await agentModel.findOneAndDelete({ username });
+                await agentModel.findOneAndDelete({ email });
             }
 
             return res.status(200).json({ message: 'User deleted successfully' });
