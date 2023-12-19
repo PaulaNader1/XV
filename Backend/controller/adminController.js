@@ -46,20 +46,20 @@ const adminController = {
         try {
             const userRole = req.user.role;
             if (!userRole || userRole !== 'admin') {
-                return res.status(403).json({ error: 'Unauthorized' });
+                return res.status(403).json({ error: 'Unauthorized', error: error.message });
             }
     
             
             const {email,newRole, primaryCategory } = req.body;
     
-            if (newRole === 'agent' && primaryCategory== null) {
-                return res.status(400).json({ error: 'Primary category is required for an agent' });
+            if (newRole === 'agent' && primaryCategory == null) {
+                return res.status(400).json({ error: 'Primary category is required for an agent', error: error.message });
             }
     
-            const user = await userModel.findOne({email});
+            const user = await userModel.findOne({ email});
     
             if (!user) {
-                return res.status(402).json({ error: 'User not found' });
+                return res.status(402).json({ error: 'User not found' ,error: error.message});
             }
             user.role = newRole;
     
@@ -80,7 +80,7 @@ const adminController = {
             return res.status(200).json({ message: 'User role updated successfully', user });
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: 'Internal server error' });
+            return res.status(500).json({ error: 'Internal server error', error: error.message });
         }
     },
     
