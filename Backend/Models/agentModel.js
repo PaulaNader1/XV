@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const agentModel = new mongoose.Schema( 
     {
         // agentId: {
-        //   type: String,
+        //   type: Number,
         //   required:true
         // },
         username: {

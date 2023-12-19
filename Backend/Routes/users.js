@@ -3,41 +3,35 @@ const router = express.Router();
 const userController = require("../controller/userController");
 const authorizationMiddleware=require('../Middleware/authorizationMiddleware')
 
-// * Get all users
-router.get("/",  authorizationMiddleware(['admin']),userController.getAllUsers);
 
-// * Get one user
-router.get("/:id", authorizationMiddleware(['admin','customer']), userController.getUser);
+// Get User by ID
+// router.get('/users/:id', authorizationMiddleware(['admin', 'user']), userController.getUser);
 
-// * Update one user
-router.put("/:id",  authorizationMiddleware(['admin','customer']),userController.updateUser);
+// Update User Name
+router.put('/users/:id/update-username', authorizationMiddleware(['user']), userController.updateUserName);
 
-// * Delete one user
-router.delete("/:id", authorizationMiddleware(['admin']), userController.deleteUser);
+// Update Password
+router.put('/users/:id/update-password', authorizationMiddleware(['user']), userController.updatePassword);
 
-// get shopping cart
-router.get("/cart/:id",  authorizationMiddleware(['admin','customer']),userController.getShoppingCart);
+// Create Ticket
+router.post('/users/:id/create-ticket', authorizationMiddleware(['user']), userController.createTicket);
 
-//* add to cart
-router.put("/addTocart/:id/:productid", authorizationMiddleware(['admin','customer']), userController.addToCart);
+// Create Knowledge Base Entry
+//router.post('/knowledgebase/create', authenticationMiddleware, authorizationMiddleware(['admin']), userController.createKnowledgeBase);
 
-//* remove from cart
-router.put("/removeFromcart/:id/:productid",  authorizationMiddleware(['admin','customer']), userController.removeFromCart);
+// Get All Knowledge Base Entries
+router.get('/knowledgebase', authorizationMiddleware(['user']), userController.getAllKnowledgeBase);
+
+// Get Knowledge Base Entries by Category
+router.get('/knowledgebase/category', authorizationMiddleware(['user']), userController.getKnowledgeBaseByCategory);
 
 //*checkout
 router.get("/checkout/:id", authorizationMiddleware(['admin','customer']), userController.checkout);
 
-//*register
-router.post("/register", authorizationMiddleware(['user','admin']),userController.register);
+// Get Knowledge Base Entries by Title
+router.get('/knowledgebase/title', authorizationMiddleware(['user']), userController.getKnowledgeBaseBytitle);
 
-//------------using router.route()-----------------
-
-// router.route("/").get(userController.getAllUsers);
-
-// router
-//   .route("/:id")
-//   .get(userController.getUser)
-//   .put(userController.updateUser)
-//   .delete(userController.deleteUser);
+// Rate Ticket
+router.put('/tickets/:ticketId/rate', authorizationMiddleware(['user']), userController.rateTicket);
 
 module.exports = router;

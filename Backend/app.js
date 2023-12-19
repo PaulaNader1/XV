@@ -3,7 +3,6 @@ const express = require("express");
 const cookieParser=require('cookie-parser')
 const app = express();
 const mongoose = require("mongoose");
-//const productRouter = require("./Routes/products");
 const userRouter = require("./Routes/users");
 const authRouter = require("./Routes/auth");
 const adminRouter = require("./Routes/adminRoutes");
@@ -24,16 +23,6 @@ app.use(
   })
 );
 
-// app.use((req, res, next) => {
-//   res.setHeader("Access-Control-Allow-Origin", "*");
-//   res.setHeader("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS,HEAD");
-//   res.setHeader(
-//     "Access-Control-Expose-Headers",
-//     "*"
-//   );
-
-//   next();
-// });
 
 app.use("/api/v1", authRouter);
 app.use(authenticationMiddleware);
