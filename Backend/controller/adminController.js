@@ -50,24 +50,26 @@ const adminController = {
             }
     
             
-            const {userid,newRole, primaryCategory } = req.body;
+            const {email,newRole, primaryCategory } = req.body;
     
             if (newRole === 'agent' && primaryCategory== null) {
                 return res.status(400).json({ error: 'Primary category is required for an agent' });
             }
     
-            const user = await userModel.findOne({_id: userid});
+            const user = await userModel.findOne({ email});
     
             if (!user) {
                 return res.status(402).json({ error: 'User not found' });
             }
             user.role = newRole;
+
+            await user.save();
     
-            const updatedUser = await userModel.findByIdAndUpdate(
-                userid,
-                { role: newRole },
-                { new: true }
-            );
+            // const updatedUser = await userModel.findByAndUpdate(
+            //     email,
+            //     { role: newRole },
+            //     { new: true }
+            // );
     
             if (newRole === 'agent') {
                 const newAgent = await agentModel.create({
@@ -81,7 +83,7 @@ const adminController = {
                 console.log('New Agent created:', savedAgent);
             }
     
-            return res.status(200).json({ message: 'User role updated successfully', user: updatedUser });
+            return res.status(200).json({ message: 'User role updated successfully', user });
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error: 'Internal server error' });
