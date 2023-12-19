@@ -4,15 +4,15 @@ const customizationModel = new mongoose.Schema(
 
 
         colors: {
-            type: String,
-            required: true,
+          primary: String,
+          secondary: String
           },
-          comapnyName: {
+          comapanyName: {
             type: String,
             required: true,
           },
           logo: {
-            type:Image,
+            type:String,
             required: true,
           },
 

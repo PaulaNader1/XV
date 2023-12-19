@@ -1,23 +1,24 @@
 
 const express = require('express');
 const router = express.Router();
-const adminController = require('../controllers/adminController');
+const adminController = require('../controller/adminController');
 const authorizationMiddleware = require("../Middleware/authorizationMiddleware");
 
 
-router.post("/create-new-user", authorizationMiddleware(['admin']), adminController.createNewUser);
+// router.post("/create-new-user", authorizationMiddleware(['admin']), adminController.createNewUser);
 
 
-router.post("/update-user-role",authorizationMiddleware(['admin']) , adminController.updateUserRole);
+router.put("/update-user-role", authorizationMiddleware(['admin']), adminController.updateUserRole); //tested done
 
 
-router.delete("/delete-user" ,  authorizationMiddleware(['admin']), adminController.deleteUser);
+router.delete("/delete-user", authorizationMiddleware(['admin']), adminController.deleteUser);// tested done
 
 
-router.post("/change-customization", authorizationMiddleware(['admin']),adminController.changeCustomization);
+
+router.put("/change-customization", authorizationMiddleware(['admin']),adminController.changeCustomization);// tested done 
 
 
-router.get("/users", authorizationMiddleware(['admin']), adminController.getAllUsers);   
+router.get("/Allusers",  authorizationMiddleware(['admin']), adminController.getAllUsers);   //tested done
 
 
 module.exports = router;

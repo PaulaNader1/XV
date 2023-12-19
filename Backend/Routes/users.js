@@ -27,6 +27,9 @@ router.put("/removeFromcart/:id/:productid",  authorizationMiddleware(['admin','
 //*checkout
 router.get("/checkout/:id", authorizationMiddleware(['admin','customer']), userController.checkout);
 
+//*register
+router.post("/register", authorizationMiddleware(['user','admin']),userController.register);
+
 //------------using router.route()-----------------
 
 // router.route("/").get(userController.getAllUsers);
