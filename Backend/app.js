@@ -1,10 +1,11 @@
+
 const express = require("express");
 const cookieParser=require('cookie-parser')
 const app = express();
 const mongoose = require("mongoose");
-const productRouter = require("./Routes/products");
 const userRouter = require("./Routes/users");
 const authRouter = require("./Routes/auth");
+const adminRouter = require("./Routes/adminRoutes");
 require('dotenv').config();
 
 const authenticationMiddleware = require("./Middleware/authenticationMiddleware");
@@ -22,21 +23,12 @@ app.use(
   })
 );
 
-// app.use((req, res, next) => {
-//   res.setHeader("Access-Control-Allow-Origin", "*");
-//   res.setHeader("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS,HEAD");
-//   res.setHeader(
-//     "Access-Control-Expose-Headers",
-//     "*"
-//   );
-
-//   next();
-// });
 
 app.use("/api/v1", authRouter);
 app.use(authenticationMiddleware);
-app.use("/api/v1/products", productRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/admins",adminRouter);
+
 
 const db_name = process.env.DB_NAME;
 // * Cloud Connection
@@ -62,3 +54,6 @@ app.use(function (req, res, next) {
   return res.status(404).send("404");
 });
 app.listen(process.env.PORT, () => console.log("server started"));
+
+
+//han call routes hena 
