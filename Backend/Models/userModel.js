@@ -7,6 +7,9 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, minlength: 8 },
     email: { type: String, required: true, unique: true },
     role: { type: String, required: true },
+    mfaSecret: { type: String }, // Secret key used for TOTP-based MFA
+    storedOTP: { type: String }, // Store the OTP temporarily for verification
+    mfaEnable: {type: Boolean},
   },
 
   {
