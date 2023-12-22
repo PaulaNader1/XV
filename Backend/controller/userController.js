@@ -43,7 +43,7 @@ const sendOTPEmail = async (email, otp) => {
 const userController = {
   register: async (req, res) => {
     try {
-      const { email, password, username, role } = req.body;
+      const { email, password, username, role, mfaEnable } = req.body;
 
       // Check if the user already exists
       const existingUser = await userModel.findOne({ email });
@@ -59,7 +59,8 @@ const userController = {
         email,
         password: hashedPassword,
         username,
-        role
+        role,
+        mfaEnable,
       });
 
       // Save the user to the database
@@ -85,6 +86,54 @@ const userController = {
         return res.status(405).json({ message: "Incorrect password" });
       }
 
+      if (user.mfaEnable === false) {
+        const currentDateTime = new Date();
+        const expiresAt = new Date(+currentDateTime + 1800000); // expire in 3 minutes
+        // Generate a JWT token
+        const token = jwt.sign(
+          { user: { userid: user._id, role: user.role } },
+          secretKey,
+          {
+            expiresIn: 3 * 60 * 60,
+          }
+        );
+
+        return res
+          .cookie("token", token, {
+            expires: expiresAt,
+            withCredentials: true,
+            httpOnly: false,
+            SameSite: 'none'
+          })
+          .status(200)
+          .json({ message: "login successfully", user });
+      }
+      // Generate and send OTP
+      const otp = generateOTP();
+      await userModel.findByIdAndUpdate(user._id, { storedOTP: otp });
+      await sendOTPEmail(email, otp);
+
+      res.status(200).json({ message: "OTP sent to email for verification" });
+    } catch (error) {
+      console.error("Error logging in:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+
+  verifyOTP: async (req, res) => {
+    try {
+      const { email, otp } = req.body;
+
+      const user = await userModel.findOne({ email });
+
+      const storedOTP = user.storedOTP;
+
+      if (!user || otp !== storedOTP) {
+        return res.status(401).json({ message: "Invalid OTP", storedOTP });
+      }
+
+      // Clear the stored OTP after successful verification
+      await userModel.findByIdAndUpdate(user._id, { storedOTP: null });
 
       const currentDateTime = new Date();
       const expiresAt = new Date(+currentDateTime + 1800000); // expire in 3 minutes
@@ -107,13 +156,12 @@ const userController = {
         .status(200)
         .json({ message: "login successfully", user });
 
+      res.status(200).json({ message: "Login successful", user });
     } catch (error) {
-      console.error("Error logging in:", error);
+      console.error("Error verifying OTP:", error);
       res.status(500).json({ message: "Server error" });
     }
   },
-
-
   // getAllUsers: async (req, res) => {
   //   try {
   //     const users = await userModel.find();
