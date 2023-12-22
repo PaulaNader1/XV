@@ -3,32 +3,67 @@ const ticketModel = require("../Models/ticketModel");
 const knowledgeBaseModel = require("../Models/knowledgeBaseModel");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
-const secretKey =process.env.SECRET_KEY ;
+const secretKey = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+const speakeasy = require("speakeasy");
+
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+const sendOTPEmail = async (email, otp) => {
+
+  // Create a transporter using Outlook's SMTP server
+  const transporter = nodemailer.createTransport({
+    host: 'smtp-mail.outlook.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD, // Your Outlook password or an App Password if two-factor authentication is enabled
+    },
+  });
+
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Your One-Time Password (OTP)',
+    text: `Your OTP for login is: ${otp}`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('OTP email sent successfully');
+  } catch (error) {
+    console.error('Error sending OTP email:', error);
+  }
+};
 const userController = {
   register: async (req, res) => {
     try {
       const { email, password, username, role } = req.body;
 
-        // Check if the user already exists
-        const existingUser = await userModel.findOne({ email });
-        if (existingUser) {
-          return res.status(409).json({ message: "User already exists" });
-        }
+      // Check if the user already exists
+      const existingUser = await userModel.findOne({ email });
+      if (existingUser) {
+        return res.status(409).json({ message: "User already exists" });
+      }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       // Create a new user
       const newUser = new userModel({
         email,
         password: hashedPassword,
         username,
-        role,
+        role
       });
 
-        // Save the user to the database
-        await newUser.save();
+      // Save the user to the database
+      await newUser.save();
 
       res.status(201).json({ message: "User registered successfully" });
     } catch (error) {
@@ -40,15 +75,16 @@ const userController = {
     try {
       const { email, password } = req.body;
 
-        const user = await userModel.findOne({ email });
-        if (!user) {
-          return res.status(404).json({ message: "Email not found" });
-        }
+      const user = await userModel.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ message: "Email not found" });
+      }
 
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) {
-          return res.status(405).json({ message: "Incorrect password" });
-        }
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        return res.status(405).json({ message: "Incorrect password" });
+      }
+
 
       const currentDateTime = new Date();
       const expiresAt = new Date(+currentDateTime + 1800000); // expire in 3 minutes
@@ -60,26 +96,24 @@ const userController = {
           expiresIn: 3 * 60 * 60,
         }
       );
-      // let newSession = new sessionModel({
-      //   userId: user._id,
-      //   token,
-      //   expiresAt: expiresAt,
-      // });
-      // await newSession.save();
+
       return res
         .cookie("token", token, {
           expires: expiresAt,
           withCredentials: true,
           httpOnly: false,
-          SameSite:'none'
+          SameSite: 'none'
         })
         .status(200)
         .json({ message: "login successfully", user });
+
     } catch (error) {
       console.error("Error logging in:", error);
       res.status(500).json({ message: "Server error" });
     }
   },
+
+
   // getAllUsers: async (req, res) => {
   //   try {
   //     const users = await userModel.find();
@@ -114,7 +148,7 @@ const userController = {
   updatePassword: async (req, res) => {
     try {
 
-      const {password} = req.body;
+      const { password } = req.body;
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = await userModel.findByIdAndUpdate(
         req.params.id,
@@ -129,7 +163,7 @@ const userController = {
     }
   },
 
-  createTicket: async (req, res) => {           
+  createTicket: async (req, res) => {
     try {
       const {
         issueinfo,
@@ -244,7 +278,7 @@ const userController = {
       res.status(200).json({ message: "Ticket rated successfully", ticket });
     } catch (error) {
       console.error("Error rating ticket:", error);
-      res.status(500).json({ message: "Server error", error: error.message  });
+      res.status(500).json({ message: "Server error", error: error.message });
     }
   },
 };
