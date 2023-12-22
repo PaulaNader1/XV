@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const agentModel = new mongoose.Schema( 
     {
-        agentId: {
-          type: String,
-          required:true
-        },
+        // agentId: {
+        //   type: Number,
+        //   required:true
+        // },
         username: {
           type: String,
           required: true,
@@ -35,5 +35,6 @@ const agentModel = new mongoose.Schema(
       }
     );
 
- module.exports = mongoose.model('agentModel', agentModel);
+
+ module.exports = mongoose.model('Agent', agentModel);
  module.exports.Schema = agentModel;   
