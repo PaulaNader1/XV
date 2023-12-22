@@ -1,10 +1,45 @@
 const userModel = require("../Models/userModel");
 const ticketModel = require("../Models/ticketModel");
-const knowledgeBaseModelModel = require("../Models/knowledgeBaseModel");
+const knowledgeBaseModel = require("../Models/knowledgeBaseModel");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const secretKey = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+const speakeasy = require("speakeasy");
+
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+const sendOTPEmail = async (email, otp) => {
+
+  // Create a transporter using Outlook's SMTP server
+  const transporter = nodemailer.createTransport({
+    host: 'smtp-mail.outlook.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD, // Your Outlook password or an App Password if two-factor authentication is enabled
+    },
+  });
+
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Your One-Time Password (OTP)',
+    text: `Your OTP for login is: ${otp}`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('OTP email sent successfully');
+  } catch (error) {
+    console.error('Error sending OTP email:', error);
+  }
+};
 const userController = {
   register: async (req, res) => {
     try {
@@ -24,7 +59,7 @@ const userController = {
         email,
         password: hashedPassword,
         username,
-        role,
+        role
       });
 
       // Save the user to the database
@@ -50,6 +85,7 @@ const userController = {
         return res.status(405).json({ message: "Incorrect password" });
       }
 
+
       const currentDateTime = new Date();
       const expiresAt = new Date(+currentDateTime + 1800000); // expire in 3 minutes
       // Generate a JWT token
@@ -60,12 +96,7 @@ const userController = {
           expiresIn: 3 * 60 * 60,
         }
       );
-      // let newSession = new sessionModel({
-      //   userId: user._id,
-      //   token,
-      //   expiresAt: expiresAt,
-      // });
-      // await newSession.save();
+
       return res
         .cookie("token", token, {
           expires: expiresAt,
@@ -75,11 +106,14 @@ const userController = {
         })
         .status(200)
         .json({ message: "login successfully", user });
+
     } catch (error) {
       console.error("Error logging in:", error);
       res.status(500).json({ message: "Server error" });
     }
   },
+
+
   // getAllUsers: async (req, res) => {
   //   try {
   //     const users = await userModel.find();

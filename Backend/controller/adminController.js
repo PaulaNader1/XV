@@ -46,30 +46,24 @@ const adminController = {
         try {
             const userRole = req.user.role;
             if (!userRole || userRole !== 'admin') {
-                return res.status(403).json({ error: 'Unauthorized' });
+                return res.status(403).json({ error: 'Unauthorized', error: error.message });
             }
     
             
             const {email,newRole, primaryCategory } = req.body;
     
-            if (newRole === 'agent' && primaryCategory== null) {
-                return res.status(400).json({ error: 'Primary category is required for an agent' });
+            if (newRole === 'agent' && primaryCategory == null) {
+                return res.status(400).json({ error: 'Primary category is required for an agent', error: error.message });
             }
     
             const user = await userModel.findOne({ email});
     
             if (!user) {
-                return res.status(402).json({ error: 'User not found' });
+                return res.status(402).json({ error: 'User not found' ,error: error.message});
             }
             user.role = newRole;
-
-            await user.save();
     
-            // const updatedUser = await userModel.findByAndUpdate(
-            //     email,
-            //     { role: newRole },
-            //     { new: true }
-            // );
+            await user.save();
     
             if (newRole === 'agent') {
                 const newAgent = await agentModel.create({
@@ -86,7 +80,7 @@ const adminController = {
             return res.status(200).json({ message: 'User role updated successfully', user });
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: 'Internal server error' });
+            return res.status(500).json({ error: 'Internal server error', error: error.message });
         }
     },
     
@@ -98,17 +92,17 @@ const adminController = {
                 return res.status(403).json({ error: 'Unauthorized' });
             }
 
-            const { username } = req.body;
-            const user = await userModel.findOne({ username });
+            const { email } = req.body;
+            const user = await userModel.findOne({ email });
 
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
 
-            await userModel.findOneAndDelete({ username });
+            await userModel.findOneAndDelete({ email });
 
             if (user.role === 'agent') {
-                await agentModel.findOneAndDelete({ username });
+                await agentModel.findOneAndDelete({ email });
             }
 
             return res.status(200).json({ message: 'User deleted successfully' });
