@@ -18,6 +18,8 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.5.3",
     "nodemailer": "^6.9.7",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
     "speakeasy": "^2.0.0"
   },
   "devDependencies": {
