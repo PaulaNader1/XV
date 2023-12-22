@@ -2,18 +2,19 @@
 const mongoose = require('mongoose');
 
 const ticketModel = new mongoose.Schema({
-    ticketid: { type: int, required: true, uniqu: true },
-    userid: { type: int, required: true },
+    userid: { type: String },
     issueinfo: { type: String, required: true },
     agentResponse:{type: String},
-    status:{type: Boolean} ,
-    agentid:{type: int}  ,
+    status:{type: String} ,
+    agentid:{type: String}  ,
     category: { type: String, required: true },
     subCategory: {type: String, required: true},
     priority: { type: String, required: true },
-    date: {type: datetime},
-    responsedate: {type: datetime},
-    responserating: {type: int},
+    date: {type: Date},
+    responsedate: {type: Date},
+    responserating: {type: Number, default: 0},
+
+    
     
 });
 
