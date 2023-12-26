@@ -183,7 +183,7 @@ const userController = {
         priority,
         date: new Date(),
         // responserating: null,
-        status: "false", // Assuming a new ticket is initially not resolved
+        status: "opened", // Assuming a new ticket is initially not resolved
       });
 
       // Save the ticket to the database
@@ -281,5 +281,13 @@ const userController = {
       res.status(500).json({ message: "Server error", error: error.message });
     }
   },
+
+  useChat: async (req, res) => {
+    try{
+
+    }catch (error) {
+
+    }
+  }
 };
 module.exports = userController;

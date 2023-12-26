@@ -1,87 +1,114 @@
-const Chat = require('./Models/chatModel');
+const chatModel = require("../Models/chatModel");
+const messageModel = require("../Models/messageModel");
+const agentModel = require("../Models/agentModel");
 
-// Async function to handle sending a message
-async function sendMessage(req, res) {
-  try {
-    // Extract sender, receiver, and message from the request body
-    const { sender, receiver, message } = req.body;
+const chatController = {
+  determineAgent: async (req, res) => {
+    try {
+      const { primary_category} = req.body;
+      const agent = await agentModel.findOne({ primary_category});
 
-    // Create a new message instance using the Chat model
-    const newMessage = new Chat({
-      sender,
-      receiver,
-      message,
-    });
+      if (!agent) {
+        return res.status(404).json({ error: "No agent found for the specified category and sub-category" });
+      }
 
-    // Save the new message to MongoDB
-    await newMessage.save();
+      return agent;
+    } catch (error) {
+      res.status(500).json({ error: `Error determining agent: ${error.message}` });
+      return null; // Or throw an error if you want to handle it differently
+    }
+  },
 
-    // Emit the message to the receiver via WebSocket
-    io.to(receiver).emit('newMessage', newMessage);
+  createChat: async (req, res) => {
+    try {
+      const { category } = req.body;
 
-    // Send a success response to the client
-    res.status(201).json({ message: 'Message sent successfully' });
-  } catch (error) {
-    // Handle errors and send an error response to the client
-    console.error('Error saving message to MongoDB:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-}
+      // Check if an available agent exists for the given category 
+      const agent = await agentModel.findOne({
+        primary_category,
+        isAvailable: true,
+      });
 
-// Export the sendMessage function for use in other files
-module.exports = { sendMessage };
+      if (!agent) {
+        return res.status(404).json({
+          error: "No available agent for the specified category",
+        });
+      }
 
+      // Create a new chat
+      const newChat = await chatModel.create({
+        userid,
+        category,
+        agent: agent.id,
+        messages: [],
+      });
 
+      // Notify the user and agent about the new chat through WebSocket
+      io.emit('newChat', newChat);
 
+      // Optionally, send the updated list of chats to all clients
+      const updatedChats = await chatModel.find();
 
+      return res.status(200).json({ newChat, updatedChats });
+    } catch (error) {
+      console.error(`Error creating chat: ${error.message}`);
+      return res.status(500).json({ error: "Error creating chat" });
+    }
+  },
 
+  sendMessage: async (req, res) => {
+    try {
+      const { chatid, sender, message } = req.body;
 
+      // Add the message to the chat
+      await chatModel.findByIdAndUpdate(chatid, {
+        $push: { messages: { sender, message } },
+      });
 
-// const Chat = require('../Models/chatModel');
-// const io = require('../app'); // Import the Socket.io instance
+      // Notify the user and agent about the new message through WebSocket
+      io.emit('newMessage', { chatid, sender, message });
 
-// const chatController = {
-//     sendMessage: async (req, res) => {
-//         try {
-//             const { sender, receiver, message } = req.body;
+      // Optionally, you can also send the updated chat to all clients
+      const updatedChat = await chatModel.findById(chatid);
 
-//             // Save message to MongoDB
-//             const newMessage = new Chat({ sender, receiver, message });
-//             await newMessage.save(); // save to mongodb
+      return res.status(200).json({ message: "Message sent successfully", updatedChat });
+    } catch (error) {
+      console.error(`Error sending message: ${error.message}`);
+      return res.status(500).json({ error: "Error sending message" });
+    }
+  },
 
-//             // Emit the message to the receiver via WebSocket
-//             io.to(receiver).emit('newMessage', newMessage);
+  readMessage: async (req, res) => {
+    try {
+      const { chatid, messageid, sessionExpirationTimestamp } = req.body;
 
-//             res.status(200).send('Message sent successfully');
-//         } catch (error) {
-//             console.error(error);
-//             res.status(500).send('Internal Server Error');
-//         }
-//     },
+      // Check if the session is still valid
+      const currentTimestamp = Date.now();
+      if (currentTimestamp > sessionExpirationTimestamp) {
+        throw new Error("Session expired. Please log in again.");
+      }
 
-//     // create chat and add to chat (with id)
-//     //send w recieve to update chat
-//     // for each msg save in db
+      // Find and update the specific message in the chat
+      const updatedChat = await chatModel.updateOne(
+        { _id: chatid, 'messages._id': messageid },
+        { $set: { 'messages.$.isRead': true } }
+      );
 
-//     receiveMessage: async (req, res) => {
-//         try {
-//             const { chatid, userid, agentid, category, sub_category, date, sender, receiver, message } = req.body;
+      // Check if the message was found and updated
+      if (updatedChat.nModified === 0) {
+        throw new Error("Message not found");
+      }
 
-//             // Save the received message to MongoDB 
-//             const receivedMessage = new Chat({
-//                 chatid, userid, agentid, category, sub_category, date, sender, receiver, message
-//             });
-//             await receivedMessage.save();
+      // Notify clients about the read message through WebSocket
+      io.emit('messageRead', { chatid, messageid, isRead: true });
 
-//             // Respond with a success message 
-//             res.status(200).send('Message received successfully');
+      // Optionally, you can return the updated chat or just a success message
+      return res.status(200).json({ messageRead: { _id: messageid, isRead: true }, updatedChat });
+    } catch (error) {
+      console.error(`Error reading message: ${error.message}`);
+      return res.status(500).json({ error: "Error reading message" });
+    }
+  },
+};
 
-//             // io.emit('newReceivedMessage', receivedMessage);
-//         } catch (error) {
-//             console.error(error);
-//             res.status(500).send('Internal Server Error');
-//         }
-//     },
-// };
-
-// module.exports = chatController;
+module.exports = chatController;
