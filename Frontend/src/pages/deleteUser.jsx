@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import AppNavBar from '../components/navbar'; // Import your Navbar component
+import AppNavBar from "../components/navbar";
 
-// Assuming you have the backend_url defined
+
 const backend_url = "http://localhost:3000/api/v1/users";
 
 const DeleteUser = () => {
@@ -10,10 +10,10 @@ const DeleteUser = () => {
 
   const deleteUser = async () => {
     try {
-      // Send a DELETE request to your backend with the email to delete
+
       await axios.delete(`${backend_url}/delete-user`, { data: { email } });
 
-      // Clear the form after successful deletion
+   
       setEmail('');
 
       console.log('User deleted successfully!');
@@ -24,7 +24,7 @@ const DeleteUser = () => {
 
   return (
     <div>
-      <AppNavBar /> {/* Include your Navbar component */}
+      <AppNavBar /> {}
       <h2>Delete User</h2>
       <div style={{ margin: '20px', padding: '20px', border: '1px solid #ccc' }}>
         <label>Email:</label>
