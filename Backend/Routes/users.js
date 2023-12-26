@@ -16,6 +16,12 @@ router.put('/users/:id/update-password', authorizationMiddleware(['user']), user
 // Create Ticket
 router.post('/users/:id/create-ticket', authorizationMiddleware(['user']), userController.createTicket);
 
+// Get Tickets
+router.get('/tickets/:id', authorizationMiddleware(['user']), userController.getTickets);
+
+//Get user info
+router.get('/:id', authorizationMiddleware(['user', 'admin', 'manager', 'agent']), userController.getUser);
+
 // Create Knowledge Base Entry
 //router.post('/knowledgebase/create', authenticationMiddleware, authorizationMiddleware(['admin']), userController.createKnowledgeBase);
 
@@ -26,10 +32,10 @@ router.get('/knowledgebase', authorizationMiddleware(['user']), userController.g
 router.get('/knowledgebase/category', authorizationMiddleware(['user']), userController.getKnowledgeBaseByCategory);
 
 // Get Knowledge Base Entries by SubCategory
-router.get('/knowledgebase/subcategory', authorizationMiddleware(['user']), userController.getKnowledgeBaseBySubCategory);
+router.get('/knowledgebase/subcategory', authorizationMiddleware(['user']), userController.getKnowledgeBaseBySubcategory);
 
 // Get Knowledge Base Entries by Title
-router.get('/knowledgebase/title', authorizationMiddleware(['user']), userController.getKnowledgeBaseBytitle);
+router.get('/knowledgebase/title', authorizationMiddleware(['user']), userController.getKnowledgeBaseByTitle);
 
 // Rate Ticket
 router.put('/tickets/:ticketId/rate', authorizationMiddleware(['user']), userController.rateTicket);

@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 const userRouter = require("./Routes/users");
 const authRouter = require("./Routes/auth");
 const adminRouter = require("./Routes/adminRoutes");
+const managerRouter = require("./Routes/managerRoutes");
+const agentRouter = require("./Routes/agentRoutes");
 require('dotenv').config();
 
 const authenticationMiddleware = require("./Middleware/authenticationMiddleware");
@@ -28,6 +30,8 @@ app.use("/api/v1", authRouter);
 app.use(authenticationMiddleware);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admins",adminRouter);
+app.use("/api/v1/manager",managerRouter);
+app.use("/api/v1/agent",agentRouter);
 
 
 const db_name = process.env.DB_NAME;
