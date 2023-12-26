@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const userRouter = require("./Routes/users");
 const authRouter = require("./Routes/auth");
 const adminRouter = require("./Routes/adminRoutes");
+const ticketsInsightsRouter = require("./Routes/ticketsInsights");
 require('dotenv').config();
 
 const authenticationMiddleware = require("./Middleware/authenticationMiddleware");
@@ -25,10 +26,10 @@ app.use(
 
 
 app.use("/api/v1", authRouter);
-app.use(authenticationMiddleware);
+ app.use(authenticationMiddleware);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admins",adminRouter);
-
+app.use("/api/v1/ticketsInsights",ticketsInsightsRouter);
 
 const db_name = process.env.DB_NAME;
 // * Cloud Connection
