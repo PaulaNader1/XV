@@ -1,5 +1,6 @@
 const userModel = require("../Models/userModel");
 const ticketModel = require("../Models/ticketModel");
+const AgentModel = require("../Models/agentModel")
 const knowledgeBaseModel = require("../Models/knowledgeBaseModel");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
@@ -40,10 +41,33 @@ const sendOTPEmail = async (email, otp) => {
     console.error('Error sending OTP email:', error);
   }
 };
+
+async function assignTicket(ticketToBeAssigned, ticketsCategoriesArr) {
+  console.log("weselt el method");
+  let ticketCategoryWithItsPriorityAgents = ticketsCategoriesArr.find(t => t.name === ticketToBeAssigned.category);
+  if (ticketCategoryWithItsPriorityAgents) {
+    for (let i = 0; i < 3; i++) {
+      let agent = ticketCategoryWithItsPriorityAgents.assignedAgents[i];
+      console.log(agent.assignedTickets.length);
+      if (agent.assignedTickets.length < 5) {
+        agent.assignedTickets.push(ticketToBeAssigned._id);
+        console.log("weselt ba3d el push");
+        await agent.save();
+        console.log("weselt");
+        ticketToBeAssigned.status = 'pending';
+        console.log("weselt");
+        ticketToBeAssigned.agentId = agent._id;
+        await ticketToBeAssigned.save();
+        break;
+      }
+    }
+  }
+};
+
 const userController = {
   register: async (req, res) => {
     try {
-      const { email, password, username, role } = req.body;
+      const { email, password, username, role, mfaEnable } = req.body;
 
       // Check if the user already exists
       const existingUser = await userModel.findOne({ email });
@@ -59,7 +83,8 @@ const userController = {
         email,
         password: hashedPassword,
         username,
-        role
+        role,
+        mfaEnable,
       });
 
       // Save the user to the database
@@ -79,12 +104,61 @@ const userController = {
       if (!user) {
         return res.status(404).json({ message: "Email not found" });
       }
+      console.log(user);
 
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (!passwordMatch) {
         return res.status(405).json({ message: "Incorrect password" });
       }
 
+      if (user.mfaEnable === false) {
+        const currentDateTime = new Date();
+        const expiresAt = new Date(+currentDateTime + 36000000); // expire in 3 minutes
+        // Generate a JWT token
+        const token = jwt.sign(
+          { user: { userid: user._id, role: user.role } },
+          secretKey,
+          {
+            expiresIn: 60 * 60 * 60,
+          }
+        );
+
+        return res
+          .cookie("token", token, {
+            expires: expiresAt,
+            withCredentials: true,
+            httpOnly: false,
+            SameSite: 'none'
+          })
+          .status(200)
+          .json({ message: "login successfully", user });
+      }
+      // Generate and send OTP
+      const otp = generateOTP();
+      await userModel.findByIdAndUpdate(user._id, { storedOTP: otp });
+      await sendOTPEmail(email, otp);
+
+      res.status(200).json({ message: "OTP sent to email for verification" });
+    } catch (error) {
+      console.error("Error logging in:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+
+  verifyOTP: async (req, res) => {
+    try {
+      const { email, otp } = req.body;
+
+      const user = await userModel.findOne({ email });
+
+      const storedOTP = user.storedOTP;
+
+      if (!user || otp !== storedOTP) {
+        return res.status(401).json({ message: "Invalid OTP", storedOTP });
+      }
+
+      // Clear the stored OTP after successful verification
+      await userModel.findByIdAndUpdate(user._id, { storedOTP: null });
 
       const currentDateTime = new Date();
       const expiresAt = new Date(+currentDateTime + 1800000); // expire in 3 minutes
@@ -107,13 +181,12 @@ const userController = {
         .status(200)
         .json({ message: "login successfully", user });
 
+      res.status(200).json({ message: "Login successful", user });
     } catch (error) {
-      console.error("Error logging in:", error);
+      console.error("Error verifying OTP:", error);
       res.status(500).json({ message: "Server error" });
     }
   },
-
-
   // getAllUsers: async (req, res) => {
   //   try {
   //     const users = await userModel.find();
@@ -163,8 +236,47 @@ const userController = {
     }
   },
 
+  getTickets: async (req, res) => {
+    try {
+      const { userid } = req.params;
+      const tickets = await ticketModel.find({ userid: userid });
+      console.log("works");
+      res.status(200).json({ tickets });
+    } catch (error) {
+      console.error("Error getting tickets:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+
+  getUser: async (req, res) => {
+    try {
+      const { userid } = req.params;
+      const user = await userModel.findOne({userid });
+      const username = user.username;
+      res.status(200).json({  username});
+    } catch (error) {
+      console.error("Error getting user info:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+
   createTicket: async (req, res) => {
     try {
+      const agentOne = await AgentModel.findOne({ primaryCategory: "Software" });
+      console.log(agentOne);
+      const agentTwo = await AgentModel.findOne({ primaryCategory: "Hardware" });
+      console.log(agentTwo);
+      const agentThree = await AgentModel.findOne({ primaryCategory: "Network" });
+      console.log(agentThree);
+      const highPriorityQueue = [];
+      const mediumPriorityQueue = [];
+      const lowPriorityQueue = [];
+
+      if (agentOne.assignedTickets.length === 5 && agentTwo.assignedTickets.length === 5 && agentThree.assignedTickets.length === 5) {
+        return res.status(400).json({ message: "All agents are busy" });
+      }
+
+      
       const {
         issueinfo,
         category,
@@ -172,22 +284,56 @@ const userController = {
         priority,
       } = req.body;
 
+      const trimmedPriority = priority.trim().toLowerCase();
+      const trimmedCategory = category.trim().toLowerCase();
+      console.log(trimmedCategory);
       const userid = req.params.id;
 
+      if(!(trimmedCategory=== "hardware") &&!(trimmedCategory === "software")&& !(trimmedCategory === "network") ){
+        return res.status(400).json({ message: "Category doesn't match " });
+      }
       // Create a new ticket
       const newTicket = new ticketModel({
         userid,
         issueinfo,
-        category,
+        category: trimmedCategory,
         subCategory,
-        priority,
+        priority: trimmedPriority,
         date: new Date(),
         // responserating: null,
         status: "opened", // Assuming a new ticket is initially not resolved
       });
 
-      // Save the ticket to the database
       await newTicket.save();
+      //Assigning ticket
+      switch (newTicket.priority) {
+        case "high":
+          highPriorityQueue.push(newTicket);
+          break;
+        case "medium":
+          mediumPriorityQueue.push(newTicket);
+          break;
+        case "low":
+          lowPriorityQueue.push(newTicket);
+          break;
+        default:
+          // Handle invalid priority (optional)
+          break;
+      }
+      let ticketPriorities = [
+        { name: 'software', assignedAgents: [agentOne, agentTwo, agentThree] },
+  
+        { name: 'hardware', assignedAgents: [agentTwo, agentThree, agentOne] },
+  
+        { name: 'network', assignedAgents: [agentThree, agentOne, agentTwo] }
+  
+      ];
+      console.log("1");
+      assignTicket(newTicket,ticketPriorities);
+
+
+
+
 
       res.status(201).json({ message: "Ticket created successfully" });
     } catch (error) {
@@ -199,8 +345,8 @@ const userController = {
   getAllKnowledgeBase: async (req, res) => {
     try {
       const knowledgeBaseEntries = await knowledgeBaseModel.find();
-
-      res.status(200).json({ knowledgeBaseEntries });
+      console.log("works");
+      res.status(200).json({message: "knowledgebase entries:", knowledgeBaseEntries });
     } catch (error) {
       console.error("Error getting Knowledge Base entries:", error);
       res.status(500).json({ message: "Server error" });
@@ -209,36 +355,35 @@ const userController = {
 
   getKnowledgeBaseByCategory: async (req, res) => {
     try {
-      const { category } = req.body;
+      const { category } = req.query;
       const knowledgeBaseEntries = await knowledgeBaseModel.find({ category });
-
       res.status(200).json({ knowledgeBaseEntries });
     } catch (error) {
       console.error("Error getting Knowledge Base entries by category:", error);
       res.status(500).json({ message: "Server error" });
     }
   },
+  
 
-  getKnowledgeBaseBySubCategory: async (req, res) => {
+  getKnowledgeBaseBySubcategory: async (req, res) => {
     try {
-      const { subcategory } = req.body;
+      const { subcategory } = req.query;
       const knowledgeBaseEntries = await knowledgeBaseModel.find({ subCategory: subcategory });
-
       res.status(200).json({ knowledgeBaseEntries });
     } catch (error) {
       console.error("Error getting Knowledge Base entries by subcategory:", error);
       res.status(500).json({ message: "Server error" });
     }
   },
+  
 
-  getKnowledgeBaseBytitle: async (req, res) => {
+  getKnowledgeBaseByTitle: async (req, res) => {
     try {
-      const { title } = req.body;
-      const knowledgeBaseEntries = await knowledgeBaseModel.find({ title: title });
-
+      const { title } = req.query;
+      const knowledgeBaseEntries = await knowledgeBaseModel.find({ title });
       res.status(200).json({ knowledgeBaseEntries });
     } catch (error) {
-      console.error("Error getting Knowledge Base entries by subcategory:", error);
+      console.error("Error getting Knowledge Base entries by title:", error);
       res.status(500).json({ message: "Server error" });
     }
   },

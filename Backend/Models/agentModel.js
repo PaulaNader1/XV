@@ -16,20 +16,21 @@ const agentModel = new mongoose.Schema(
             type: String,
             required: true,
         },
-        primary_category: {
-            type: String,
-            required: true,
+
+        primaryCategory:{
+            type:String,
+            required:true
         },
-      //   sub_category: {
-      //     type: String,
-      //     required: true,
-      // },
-        isAvailable: {
-            type: Boolean,
-            default: true,
+        noOfTickets: {
+          type: Number
         },
-    },
-    {
+    
+        assignedTickets: {
+          type: Array
+        },
+      },
+      // schemaOptions
+      {
         strict: true,
         timestamps: true,
     }
