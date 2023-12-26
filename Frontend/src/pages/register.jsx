@@ -11,18 +11,19 @@ const Signup = () => {
     email: "",
     password: "",
     username: "",
+    mfaEnable: false,
   });
   const [successMessage, setSucessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { email, password, username } = inputValue;
+  const { email, password, username, mfaEnable } = inputValue;
   const handleOnChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     console.log(name);
     console.log(value);
     setInputValue((prevInputValue) => ({
       ...prevInputValue,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -41,9 +42,11 @@ const Signup = () => {
       const response = await axios.post(
         `${backend_url}/register`,
         {
-          ...inputValue,
-          displayName:username,
-          role: "customer",
+          email,
+          password,
+          username,
+          role: "user",
+          mfaEnable,
         },
         { withCredentials: true }
       );
@@ -51,11 +54,9 @@ const Signup = () => {
       if (status == 201) {
         // handleSuccess(message);
         setSucessMessage("SignUp successfuly");
-        setTimeout(() => {
-          navigate("/");
-        }, 1000);
+        navigate("/");
       } else {
-        setErrorMessage(message);
+        setErrorMessage(data.message);
 
         // handleError(message);
       }
@@ -63,12 +64,12 @@ const Signup = () => {
       console.log(error);
       setErrorMessage(error.message);
     }
-    setInputValue({
-      ...inputValue,
-      email: "",
-      password: "",
-      // displayName: "",
-    });
+    // setInputValue({
+    //   ...inputValue,
+    //   email: "",
+    //   password: "",
+    //   // displayName: "",
+    // });
   };
 
   return (
@@ -102,6 +103,15 @@ const Signup = () => {
             name="password"
             value={password}
             placeholder="Enter your password"
+            onChange={handleOnChange}
+          />
+        </div>
+        <div>
+          <label htmlFor="mfaEnable">Enable MFA</label>
+          <input
+            type="checkbox"
+            name="mfaEnable"
+            checked={mfaEnable}
             onChange={handleOnChange}
           />
         </div>

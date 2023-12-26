@@ -8,10 +8,10 @@ export default function AppNavBar() {
     <Container>
     <Nav>
       <Nav.Item>
-        <Link to="/home">Home      </Link>  
+        <Link to="/homeadmin">Home      </Link>  
       </Nav.Item>
       <Nav.Item>
-        <Link to="/KnowledgeBase">      knowledgeBase</Link>
+        <Link to="/update-role">      update role</Link>
       </Nav.Item>
       <Nav.Item>
         <Link to="/ticket">     Tickets</Link>

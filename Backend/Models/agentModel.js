@@ -26,7 +26,14 @@ const agentModel = new mongoose.Schema(
         primaryCategory:{
             type:String,
             required:true
-        }
+        },
+        noOfTickets: {
+          type: Number
+        },
+    
+        assignedTickets: {
+          type: Array
+        },
       },
       // schemaOptions
       {
