@@ -10,7 +10,7 @@ const knowledgeBaseModel = new mongoose.Schema(
           required: true,
         },
         subCategory: {
-          type: Number,
+          type: String,
           required: true,
         },
 

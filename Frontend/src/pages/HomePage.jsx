@@ -9,20 +9,22 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [cookies, removeCookies] = useCookies([]);
   const [userName, setUserName] = useState("");
-  // useeffect to fetch username
+ // useeffect to fetch username
   useEffect(() => {
     async function fetchData() {
       try {
         if (!cookies.token) {
-          navigate("/login");
+          navigate("/");
         }
+
         const uid = localStorage.getItem("userId");
-        console.log(uid);
+        localStorage.setItem("token", cookies.token);
 
         const response = await axios.get(`${backend_url}/users/${uid}`, {
           withCredentials: true,
         });
         console.log("response", response);
+        console.log(uid);
 
         // if (!response.status == 200) {
         //   console.log('status from home page', response.status)
@@ -30,10 +32,10 @@ export default function HomePage() {
         //   removeCookies('token')
         //   navigate('/login')
         // }
-        setUserName(response.data.displayName);
+         setUserName(response.data.username);
       } catch (error) {
-        console.log("error");
-        console.log(error);
+         console.log("error");
+         console.log(error);
       }
     }
 

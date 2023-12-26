@@ -7,25 +7,29 @@ import "./App.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Route  , Router, Routes } from "react-router-dom";
 import Homepage from "./pages/HomePage";
-import Productspage from './pages/productsPage'
-import CartPage from "./pages/cartPage";
+import HomeAdmin from './pages/HomeAdmin';
+import UpdateRole from "./pages/UpdateUserRole";
 import Checkout from "./pages/checkoutPage";
-import TryParams from "./pages/trySearchParams";
+import Profile from "./pages/myProfile";
 import Login from "./pages/login";
 import Signup from "./pages/register";
+import MFAPage from "./pages/mfaPage";
+import KnowledgeBase from "./pages/KnowledgeBase";
+import Ticket from "./pages/ticket";
 function App() {
   return (
     <>
         <Routes>
-          <Route path="/login" element={<Login  />} />
+          <Route path="/" element={<Login/>} />
           <Route path="/signup" element={<Signup/>}/>
-          
-          <Route path="/" element={<Homepage />} />
-
-          <Route path="/products" element={<Productspage />} />
-          <Route path="/cart" element={<CartPage />} />
+          <Route path="/mfa" element={<MFAPage />} />
+          <Route path="/KnowledgeBase" element={<KnowledgeBase />} />
+          <Route path="/home" element={<Homepage />} />
+          <Route path="/ticket" element={<Ticket />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/homeadmin" element={<HomeAdmin />} />
+          <Route path="/update-role" element={<UpdateRole />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/:id" element={<TryParams />} />
 
 
 

@@ -1,78 +1,84 @@
-import "../stylesheets/auth.css";
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+// Import necessary dependencies
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-let backend_url = "http://localhost:3000/api/v1";
-// import { ToastContainer, toast } from "react-toastify";
+
+const backend_url = "http://localhost:3000/api/v1";
 
 const Login = () => {
   const navigate = useNavigate();
+  //const location = useLocation();
   const [inputValue, setInputValue] = useState({
     email: "",
     password: "",
   });
-  const [successMessage, setSucessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+
   const { email, password } = inputValue;
+
+
+
   const handleOnChange = (e) => {
     const { name, value } = e.target;
-    setInputValue((prevInput) => ({
-      ...prevInput,
+    setInputValue((prevInputValue) => ({
+      ...prevInputValue,
       [name]: value,
     }));
   };
 
-  // const handleError = (msg) => setErrorMessage(msg);
-
-  // // toast.error(err, {
-  // //   position: "bottom-left",
-  // // });
-  // const handleSuccess = (msg) => setSucessMessage(msg);
-  // // toast.success(msg, {
-  // //   position: "bottom-left",
-  // // });
-
   const handleSubmit = async (e) => {
+    // const userModel = require('../../../Backend/Models/userModel');
     e.preventDefault();
     try {
       const response = await axios.post(
         `${backend_url}/login`,
         {
-          ...inputValue,
+          email,
+          password,
         },
         { withCredentials: true }
       );
-      // console.log(data);
+      // const token = response.cookie.token;
+      // localStorage.setItem('token', token);
       const { status, data } = response;
-      console.log('data',data)
-      if (status==200) {
-        // handleSuccess(message);
-        localStorage.setItem("userId",response.data.user._id)
-        localStorage.setItem("role",response.data.user.role)
-        // setSucessMessage(message)
-        setTimeout(() => {
-          navigate("/");
-        }, 1000);
+      if (status === 200) {
+        if (data.message === "OTP sent to email for verification") {
+          // Redirect to MFA page if MFA is enabled
+          navigate("/mfa", {
+            state: {
+              // email,  // Include the email in the state
+              message: "Please enter the OTP sent to your email for verification.",
+            },
+          });
+        } else {
+          localStorage.setItem("userId", response.data.user._id);
+          localStorage.setItem("role", response.data.user.role);
+          // Redirect to home page if MFA is not enabled
+          if (response.data.user.role === "admin") {
+            navigate("/homeadmin");
+          } else {
+            navigate("/home");
+          }
+        }
       } else {
-        console.log();
-        // setErrorMessage(message);
-
-
+        // Handle other cases (e.g., incorrect password, email not found)
+        console.error(data.message);
       }
     } catch (error) {
       console.log(error);
-      // setErrorMessage(error.message);
+      // Handle other errors
     }
-    setInputValue({
-      ...inputValue,
-      email: "",
-      password: "",
-    });
   };
 
+  // Check if the user was redirected from the signup page
+  // useEffect(() => {
+  //   if (location.state && location.state.message) {
+  //     console.log(location.state.message);
+  //   }
+  // }, [location.state]);
+
   return (
-    <div className="form_container" >
-      <h2>Login Account</h2>
+    <div className="form_container">
+      <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="email">Email</label>
@@ -96,10 +102,7 @@ const Login = () => {
         </div>
         <button type="submit">Submit</button>
         <span>
-          {errorMessage} {successMessage}
-        </span>
-        <span>
-          Already have an account? <Link to={"/signup"}>Signup</Link>
+          Don't have an account? <Link to={"/signup"}>Sign up</Link>
         </span>
       </form>
     </div>
