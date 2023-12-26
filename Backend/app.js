@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const userRouter = require("./Routes/users");
 const authRouter = require("./Routes/auth");
 const adminRouter = require("./Routes/adminRoutes");
+
 require('dotenv').config();
 
 const authenticationMiddleware = require("./Middleware/authenticationMiddleware");
@@ -25,6 +26,7 @@ app.use(
 
 
 app.use("/api/v1", authRouter);
+
 app.use(authenticationMiddleware);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admins",adminRouter);

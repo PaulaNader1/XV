@@ -9,7 +9,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState({
     email: "",
-    password: "",
+    password: "", 
   });
   const [successMessage, setSucessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
