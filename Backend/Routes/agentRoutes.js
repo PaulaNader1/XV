@@ -5,7 +5,7 @@ const authorizationMiddleware = require("../Middleware/authorizationMiddleware")
 
 router.put('/tickets/:ticketId/close', authorizationMiddleware(['agent']), agentController.closeTicket);
 
-router.get("/provideCwf", authorizationMiddleware(['agent']), agentController.provideCwf)
+router.get("/provideCwf", authorizationMiddleware(['user']), agentController.provideCwf);
 
 
 module.exports = router;

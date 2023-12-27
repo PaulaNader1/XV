@@ -26,7 +26,7 @@ router.get('/:id', authorizationMiddleware(['user', 'admin', 'manager', 'agent']
 //router.post('/knowledgebase/create', authenticationMiddleware, authorizationMiddleware(['admin']), userController.createKnowledgeBase);
 
 // Get All Knowledge Base Entries
-router.get('/knowledgebase', authorizationMiddleware(['user']), userController.getAllKnowledgeBase);
+router.get('/users/knowledgebase', authorizationMiddleware(['user']), userController.getAllKnowledgeBase);
 
 // Get Knowledge Base Entries by Category
 router.get('/knowledgebase/category', authorizationMiddleware(['user']), userController.getKnowledgeBaseByCategory);

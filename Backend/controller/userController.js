@@ -238,9 +238,11 @@ const userController = {
 
   getTickets: async (req, res) => {
     try {
-      const { userid } = req.params;
-      const tickets = await ticketModel.find({ userid: userid });
+      const { id } = req.params;
+      const tickets = await ticketModel.find({ userid: id });
+      console.log(id);
       console.log("works");
+      console.log(tickets);
       res.status(200).json({ tickets });
     } catch (error) {
       console.error("Error getting tickets:", error);
@@ -251,9 +253,8 @@ const userController = {
   getUser: async (req, res) => {
     try {
       const { userid } = req.params;
-      const user = await userModel.findOne({userid });
-      const username = user.username;
-      res.status(200).json({  username});
+      const user = await userModel.findOne({ userid });
+      res.status(200).json({ user });
     } catch (error) {
       console.error("Error getting user info:", error);
       res.status(500).json({ message: "Server error" });
@@ -276,7 +277,7 @@ const userController = {
         return res.status(400).json({ message: "All agents are busy" });
       }
 
-      
+
       const {
         issueinfo,
         category,
@@ -289,7 +290,7 @@ const userController = {
       console.log(trimmedCategory);
       const userid = req.params.id;
 
-      if(!(trimmedCategory=== "hardware") &&!(trimmedCategory === "software")&& !(trimmedCategory === "network") ){
+      if (!(trimmedCategory === "hardware") && !(trimmedCategory === "software") && !(trimmedCategory === "network")) {
         return res.status(400).json({ message: "Category doesn't match " });
       }
       // Create a new ticket
@@ -322,14 +323,14 @@ const userController = {
       }
       let ticketPriorities = [
         { name: 'software', assignedAgents: [agentOne, agentTwo, agentThree] },
-  
+
         { name: 'hardware', assignedAgents: [agentTwo, agentThree, agentOne] },
-  
+
         { name: 'network', assignedAgents: [agentThree, agentOne, agentTwo] }
-  
+
       ];
       console.log("1");
-      assignTicket(newTicket,ticketPriorities);
+      assignTicket(newTicket, ticketPriorities);
 
 
 
@@ -345,8 +346,9 @@ const userController = {
   getAllKnowledgeBase: async (req, res) => {
     try {
       const knowledgeBaseEntries = await knowledgeBaseModel.find();
+      console.log(knowledgeBaseEntries);
       console.log("works");
-      res.status(200).json({message: "knowledgebase entries:", knowledgeBaseEntries });
+      res.status(200).json({ message: "knowledgebase entries:", knowledgeBaseEntries });
     } catch (error) {
       console.error("Error getting Knowledge Base entries:", error);
       res.status(500).json({ message: "Server error" });
@@ -363,7 +365,7 @@ const userController = {
       res.status(500).json({ message: "Server error" });
     }
   },
-  
+
 
   getKnowledgeBaseBySubcategory: async (req, res) => {
     try {
@@ -375,7 +377,7 @@ const userController = {
       res.status(500).json({ message: "Server error" });
     }
   },
-  
+
 
   getKnowledgeBaseByTitle: async (req, res) => {
     try {

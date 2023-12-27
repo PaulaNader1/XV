@@ -9,13 +9,15 @@ import { Route  , Router, Routes } from "react-router-dom";
 import Homepage from "./pages/HomePage";
 import HomeAdmin from './pages/HomeAdmin';
 import UpdateRole from "./pages/UpdateUserRole";
-import Checkout from "./pages/checkoutPage";
+import DeleteUser from "./pages/deleteUser";
 import Profile from "./pages/myProfile";
 import Login from "./pages/login";
 import Signup from "./pages/register";
 import MFAPage from "./pages/mfaPage";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Ticket from "./pages/ticket";
+import RateTicket from "./pages/rateTicket";
+import GetUsers from "./pages/getAllUsers";
 function App() {
   return (
     <>
@@ -29,8 +31,9 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/homeadmin" element={<HomeAdmin />} />
           <Route path="/update-role" element={<UpdateRole />} />
-          <Route path="/checkout" element={<Checkout />} />
-
+          <Route path="/deleteUser" element={<DeleteUser />} />
+          <Route path="/rateTicket" element={<RateTicket />} />
+          <Route path="/getUsers" element={<GetUsers />} />
 
 
 

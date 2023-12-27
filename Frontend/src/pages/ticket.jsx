@@ -1,5 +1,4 @@
 // TicketPage.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AppNavBar from '../components/navbar'; // Import your Navbar component
@@ -14,6 +13,7 @@ const TicketPage = () => {
     const [priority, setPriority] = useState('');
     const [info, setInfo] = useState('');
     const [tickets, setTickets] = useState([]);
+    const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
         // Fetch user's tickets initially
@@ -22,12 +22,18 @@ const TicketPage = () => {
 
     const createTicket = async () => {
         try {
-            await axios.post(`${backend_url}/users/:id/create-ticket`, {
+            const uid = localStorage.getItem("userId");
+            await axios.post(`${backend_url}/users/${uid}/create-ticket`, {
                 title,
                 category,
                 subCategory: subcategory,
                 priority,
-                info,
+                issueinfo: info,
+            }, {
+                withCredentials: true,
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
             });
 
             // Clear the form after successful ticket creation
@@ -40,7 +46,8 @@ const TicketPage = () => {
             // Refresh the user's tickets after creating a new one
             getTickets();
 
-            console.log('Ticket created successfully!');
+            // Display success message
+            setSuccessMessage('Ticket created successfully!');
         } catch (error) {
             console.error('Error creating ticket:', error);
         }
@@ -49,7 +56,16 @@ const TicketPage = () => {
     const getTickets = async () => {
         try {
             // Replace ":id" with the actual user ID
-            const response = await axios.get(`${backend_url}/tickets/:id`);
+            const uid = localStorage.getItem("userId");
+            console.log(uid);
+            const response = await axios.get(`http://localhost:3000/api/v1/users/tickets/${uid}`, {
+                withCredentials: true,
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            console.log('Tickets:', response.data.tickets);
+
             setTickets(response.data.tickets);
         } catch (error) {
             console.error('Error getting tickets:', error);
@@ -115,12 +131,16 @@ const TicketPage = () => {
                 <button type="button" onClick={createTicket}>Create Ticket</button>
             </form>
 
+            {/* Display success message if it exists */}
+            {successMessage && <p>{successMessage}</p>}
+
             <h2>Your Tickets</h2>
             <ul>
                 {tickets.map((ticket) => (
                     <li key={ticket._id}>
-                        <strong>Title:</strong> {ticket.title}, <strong>Category:</strong>{' '}
-                        {ticket.category}, <strong>Priority:</strong> {ticket.priority}
+                        <strong>Title:</strong> {ticket.title}, <strong>Category:</strong> {ticket.category},{' '}
+                        <strong>Subcategory:</strong> {ticket.subCategory}, <strong>Priority:</strong> {ticket.priority},{' '}
+                        <strong>Issue Info:</strong> {ticket.issueinfo}
                     </li>
                 ))}
             </ul>

@@ -20,9 +20,14 @@ const MyProfile = () => {
   const getUserInfo = async () => {
     try {
       // Replace ":id" with the actual user ID
-      const {uid} = localStorage.getItem("userId");
+      const uid = localStorage.getItem("userId");
       console.log(uid);
-      const response = await axios.get(`${backend_url}/users/${uid}`);
+      const response = await axios.get(`${backend_url}/${uid}`, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       setUser(response.data.user);
     } catch (error) {
       console.error('Error getting user info:', error);
@@ -32,9 +37,14 @@ const MyProfile = () => {
   const updateUsername = async () => {
     try {
       // Replace ":id" with the actual user ID
-      const {id} = localStorage.getItem("userId");
+      const  id  = localStorage.getItem("userId");
       await axios.put(`${backend_url}/users/${id}/update-username`, {
         newUsername,
+      }, {
+        withCredentials: true,  
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
 
       // Clear the form after successful update
@@ -52,9 +62,14 @@ const MyProfile = () => {
   const updatePassword = async () => {
     try {
       // Replace ":id" with the actual user ID
-      const {id} = localStorage.getItem("userId");
+      const  id  = localStorage.getItem("userId");
       await axios.put(`${backend_url}/users/${id}/update-password`, {
         newPassword,
+      }, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
 
       // Clear the form after successful update
@@ -73,11 +88,13 @@ const MyProfile = () => {
     <div>
       <AppNavBar /> {/* Include your Navbar component */}
       <h2>My Profile</h2>
-      <div>
-        <strong>Email:</strong> {user.email}
-      </div>
+      {user?.email && (
+        <div>
+          <strong>Email:</strong> {user.email}
+        </div>
+      )}
       <div style={{ margin: '20px', padding: '20px', border: '1px solid #ccc' }}>
-        <strong>Username:</strong> {user.username}
+        <strong>Username:</strong> {user?.username}
         <button onClick={updateUsername}>Update Username</button>
         <input
           type="text"
@@ -97,6 +114,7 @@ const MyProfile = () => {
       </div>
     </div>
   );
+
 };
 
 export default MyProfile;

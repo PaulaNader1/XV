@@ -24,17 +24,18 @@ const KnowledgeBase = () => {
     const getAllKnowledgeBase = async () => {
         try {
             if (!cookies.token) {
-                navigate("/login");
+                navigate("/");
             }
-            console.log(cookies.token);
-            const response = await axios.get("http://localhost:3000/api/v1/users/knowledgebase", {
+            const response = await axios.get("http://localhost:3000/api/v1/users/users/knowledgebase", {
                 withCredentials: true,
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
 
-            if (response.data && response.data.knowledgeBaseEntries) {
+            console.log(response.data);
+
+            if (response.data && response.data && response.data.knowledgeBaseEntries) {
                 setKnowledgeBaseEntries(response.data.knowledgeBaseEntries);
                 setSearchText('All Knowledge Base Entries');
             } else {
@@ -42,6 +43,7 @@ const KnowledgeBase = () => {
                 // Optionally, you can display an error message to the user
                 // setErrorMessage('Error fetching knowledge base entries');
             }
+
         } catch (error) {
             console.error('Error fetching knowledge base entries:', error);
             // Optionally, you can display an error message to the user
@@ -52,7 +54,7 @@ const KnowledgeBase = () => {
     const searchByCategory = async () => {
         try {
             if (!cookies.token) {
-                navigate("/login");
+                navigate("/");
             }
             const response = await axios.get("http://localhost:3000/api/v1/users/knowledgebase/category", {
                 params: { category },
@@ -76,7 +78,7 @@ const KnowledgeBase = () => {
     const searchBySubcategory = async () => {
         try {
             if (!cookies.token) {
-                navigate("/login");
+                navigate("/");
             }
             const response = await axios.get("http://localhost:3000/api/v1/users/knowledgebase/subCategory", {
                 params: { subcategory }, // Use params instead of body for a GET request
@@ -100,7 +102,7 @@ const KnowledgeBase = () => {
     const searchByTitle = async () => {
         try {
             if (!cookies.token) {
-                navigate("/login");
+                navigate("/");
             }
             const response = await axios.get(`${backend_url}/knowledgebase/title`, {
                 params: { title }, // Use params instead of body for a GET request
