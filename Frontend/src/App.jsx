@@ -44,8 +44,8 @@ function App() {
           <Route path="/homemanager" element={<HomeManager />} />
           <Route path="/tickettable" element={<TicketsTable />} />
           <Route path="/homeagent" element={<HomeAgent />} />
-
       </Routes>
+
     </>
   );
 }
