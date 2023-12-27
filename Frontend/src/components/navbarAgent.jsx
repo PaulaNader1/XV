@@ -8,19 +8,16 @@ export default function AppNavBar() {
     <Container>
     <Nav>
       <Nav.Item>
-        <Link to="/homemanager">Home      .</Link>  
+        <Link to="/homeagent">Home       .</Link>  
       </Nav.Item>
       <Nav.Item>
-        <Link to="/generateReport">Generate Report       .</Link>
-      </Nav.Item>
-      <Nav.Item>
-        <Link to="/generateAnalytics">Generate Analytics       .</Link>
+        <Link to="/tickettable">Process Tickets       .</Link>
       </Nav.Item>
       {/* <Nav.Item>
-        <Link to="/profile">My Profile       .</Link>
+        <Link to="/deleteUser">Delete User     .</Link>
       </Nav.Item>
       <Nav.Item>
-        <Link to="/rateTicket">Rate Ticket       .</Link>
+        <Link to="/getUsers">getUsers       .</Link>
       </Nav.Item> */}
     </Nav>
 

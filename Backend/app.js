@@ -31,7 +31,7 @@ app.use(authenticationMiddleware);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admins",adminRouter);
 app.use("/api/v1/manager",managerRouter);
-app.use("/api/v1/agent",agentRouter);
+app.use("/api/v1/agents", agentRouter)
 
 
 const db_name = process.env.DB_NAME;

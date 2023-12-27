@@ -9,7 +9,7 @@ const ticketModel = new mongoose.Schema({
     agentid:{type: String}  ,
     category: { type: String, required: true },
     subCategory: {type: String, required: true},
-    priority: { type: String, required: true },
+    priority: { type: String},
     date: {type: Date},
     responsedate: {type: Date},
     responserating: {type: Number, default: 0},

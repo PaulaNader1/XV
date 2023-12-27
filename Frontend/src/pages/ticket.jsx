@@ -1,4 +1,3 @@
-// TicketPage.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AppNavBar from '../components/navbar'; // Import your Navbar component
@@ -10,15 +9,22 @@ const TicketPage = () => {
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('');
     const [subcategory, setSubcategory] = useState('');
-    const [priority, setPriority] = useState('');
     const [info, setInfo] = useState('');
     const [tickets, setTickets] = useState([]);
+    const [knowledgeBase, setKnowledgeBase] = useState(null); // Added state for knowledge base entries
     const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
         // Fetch user's tickets initially
         getTickets();
     }, []);
+
+    // Fetch knowledge base entries when category and subcategory change
+    useEffect(() => {
+        if (category && subcategory) {
+            provideCwf();
+        }
+    }, [category, subcategory]);
 
     const createTicket = async () => {
         try {
@@ -27,7 +33,6 @@ const TicketPage = () => {
                 title,
                 category,
                 subCategory: subcategory,
-                priority,
                 issueinfo: info,
             }, {
                 withCredentials: true,
@@ -40,7 +45,6 @@ const TicketPage = () => {
             setTitle('');
             setCategory('');
             setSubcategory('');
-            setPriority('');
             setInfo('');
 
             // Refresh the user's tickets after creating a new one
@@ -57,18 +61,36 @@ const TicketPage = () => {
         try {
             // Replace ":id" with the actual user ID
             const uid = localStorage.getItem("userId");
-            console.log(uid);
-            const response = await axios.get(`http://localhost:3000/api/v1/users/tickets/${uid}`, {
+            const response = await axios.get(`${backend_url}/tickets/${uid}`, {
                 withCredentials: true,
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
-            console.log('Tickets:', response.data.tickets);
 
             setTickets(response.data.tickets);
         } catch (error) {
             console.error('Error getting tickets:', error);
+        }
+    };
+
+    const provideCwf = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/api/v1/agents/provideCwf", {
+                params: {
+                    Category: category,
+                    subCategory: subcategory,
+                },
+                withCredentials: true,
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            // Update the knowledge base state with the response data
+            setKnowledgeBase(response.data.data);
+        } catch (error) {
+            console.error('Error fetching knowledge base:', error);
         }
     };
 
@@ -117,13 +139,6 @@ const TicketPage = () => {
                     )}
                 </select>
 
-                <label htmlFor="priority">Priority:</label>
-                <select name="priority" value={priority} onChange={(e) => setPriority(e.target.value)}>
-                    <option value="">Select Priority</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                </select>
 
                 <label htmlFor="info">Info:</label>
                 <textarea name="info" value={info} onChange={(e) => setInfo(e.target.value)} />
@@ -144,6 +159,18 @@ const TicketPage = () => {
                     </li>
                 ))}
             </ul>
+
+            {/* Display knowledge base entries */}
+            <h2>Knowledge Base Entries</h2>
+            {/* {knowledgeBase !== null ? (
+                <ul>
+                    {knowledgeBase.map((entry, index) => (
+                        <li key={index}>{entry}</li>
+                    ))}
+                </ul>
+            ) : (
+                <p>No knowledge base entries available.</p>
+            )} */}
         </div>
     );
 };

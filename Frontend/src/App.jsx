@@ -18,6 +18,11 @@ import KnowledgeBase from "./pages/KnowledgeBase";
 import Ticket from "./pages/ticket";
 import RateTicket from "./pages/rateTicket";
 import GetUsers from "./pages/getAllUsers";
+import GenerateReport from "./pages/generateReport";
+import GenerateAnalytics from "./pages/analytics";
+import HomeManager from "./pages/HomeManager";
+import TicketTable from "./pages/ticketstable";
+import HomeAgent from "./pages/HomeAgent";
 function App() {
   return (
     <>
@@ -34,8 +39,11 @@ function App() {
           <Route path="/deleteUser" element={<DeleteUser />} />
           <Route path="/rateTicket" element={<RateTicket />} />
           <Route path="/getUsers" element={<GetUsers />} />
-
-
+          <Route path="/generateReport" element={<GenerateReport />} />
+          <Route path="/generateAnalytics" element={<GenerateAnalytics />} />
+          <Route path="/homemanager" element={<HomeManager />} />
+          <Route path="/tickettable" element={<TicketTable />} />
+          <Route path="/homeagent" element={<HomeAgent />} />
 
         </Routes>
     </>

@@ -52,11 +52,14 @@ const Login = () => {
         } else {
           localStorage.setItem("userId", response.data.user._id);
           localStorage.setItem("role", response.data.user.role);
-          // Redirect to home page if MFA is not enabled
-          if (response.data.user.role === "admin") {
+          if (response.data.user.role === "manager") {
+            navigate("/homemanager");
+          } else if (response.data.user.role === "admin") {
             navigate("/homeadmin");
-          } else {
+          } else if (response.data.user.role === "user") {
             navigate("/home");
+          }else if (response.data.user.role === "agent"){
+            navigate("/homeagent");
           }
         }
       } else {

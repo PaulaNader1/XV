@@ -1,6 +1,7 @@
 const userModel = require("../Models/userModel");
 const ticketModel = require("../Models/ticketModel");
 const AgentModel = require("../Models/agentModel")
+const AgentController = require("./agentController");
 const knowledgeBaseModel = require("../Models/knowledgeBaseModel");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
@@ -262,82 +263,45 @@ const userController = {
   },
 
   createTicket: async (req, res) => {
-    try {
-      const agentOne = await AgentModel.findOne({ primaryCategory: "Software" });
-      console.log(agentOne);
-      const agentTwo = await AgentModel.findOne({ primaryCategory: "Hardware" });
-      console.log(agentTwo);
-      const agentThree = await AgentModel.findOne({ primaryCategory: "Network" });
-      console.log(agentThree);
-      const highPriorityQueue = [];
-      const mediumPriorityQueue = [];
-      const lowPriorityQueue = [];
-
-      if (agentOne.assignedTickets.length === 5 && agentTwo.assignedTickets.length === 5 && agentThree.assignedTickets.length === 5) {
-        return res.status(400).json({ message: "All agents are busy" });
-      }
-
-
+    try {       
       const {
         issueinfo,
         category,
         subCategory,
-        priority,
       } = req.body;
+      const userid = req.user.userid;
+      const user = await userModel.findById(userid);
 
-      const trimmedPriority = priority.trim().toLowerCase();
-      const trimmedCategory = category.trim().toLowerCase();
-      console.log(trimmedCategory);
-      const userid = req.params.id;
+      if (!user) {
+        return res.status(400).json({ message: "User doesn't exist in our system" });
+      };
 
-      if (!(trimmedCategory === "hardware") && !(trimmedCategory === "software") && !(trimmedCategory === "network")) {
-        return res.status(400).json({ message: "Category doesn't match " });
-      }
+      const trimmedCategory = category?.trim().toLowerCase();
+
+      if (!trimmedCategory || !subCategory || !issueinfo) {
+        return res.status(400).json({ message: "Please make sure that you pass all the required properties :-( category , subCategory and issueinfo)" });
+      };
+
+      const categories = ['hardware', 'software', 'network'];
+      if (!categories.some(category => category === trimmedCategory)) {
+        return res.status(400).json({ message: "Category doesn't match" });
+      };
       // Create a new ticket
       const newTicket = new ticketModel({
-        userid,
+        userid: userid,
         issueinfo,
         category: trimmedCategory,
         subCategory,
-        priority: trimmedPriority,
-        date: new Date(),
-        // responserating: null,
         status: "opened", // Assuming a new ticket is initially not resolved
       });
 
       await newTicket.save();
-      //Assigning ticket
-      switch (newTicket.priority) {
-        case "high":
-          highPriorityQueue.push(newTicket);
-          break;
-        case "medium":
-          mediumPriorityQueue.push(newTicket);
-          break;
-        case "low":
-          lowPriorityQueue.push(newTicket);
-          break;
-        default:
-          // Handle invalid priority (optional)
-          break;
-      }
-      let ticketPriorities = [
-        { name: 'software', assignedAgents: [agentOne, agentTwo, agentThree] },
-
-        { name: 'hardware', assignedAgents: [agentTwo, agentThree, agentOne] },
-
-        { name: 'network', assignedAgents: [agentThree, agentOne, agentTwo] }
-
-      ];
-      console.log("1");
-      assignTicket(newTicket, ticketPriorities);
-
-
-
-
+ 
+      await AgentController.assignTicket(newTicket);
 
       res.status(201).json({ message: "Ticket created successfully" });
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error creating ticket:", error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
