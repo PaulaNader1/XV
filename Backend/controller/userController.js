@@ -1,8 +1,11 @@
+const agentModel = require("../Models/agentModel");
 const userModel = require("../Models/userModel");
 const ticketModel = require("../Models/ticketModel");
 const AgentModel = require("../Models/agentModel")
 const AgentController = require("./agentController");
 const knowledgeBaseModel = require("../Models/knowledgeBaseModel");
+const AgentController = require("./agentController");
+//const productModel = require("../Models/productModel");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const secretKey = process.env.SECRET_KEY;
@@ -40,28 +43,6 @@ const sendOTPEmail = async (email, otp) => {
     console.log('OTP email sent successfully');
   } catch (error) {
     console.error('Error sending OTP email:', error);
-  }
-};
-
-async function assignTicket(ticketToBeAssigned, ticketsCategoriesArr) {
-  console.log("weselt el method");
-  let ticketCategoryWithItsPriorityAgents = ticketsCategoriesArr.find(t => t.name === ticketToBeAssigned.category);
-  if (ticketCategoryWithItsPriorityAgents) {
-    for (let i = 0; i < 3; i++) {
-      let agent = ticketCategoryWithItsPriorityAgents.assignedAgents[i];
-      console.log(agent.assignedTickets.length);
-      if (agent.assignedTickets.length < 5) {
-        agent.assignedTickets.push(ticketToBeAssigned._id);
-        console.log("weselt ba3d el push");
-        await agent.save();
-        console.log("weselt");
-        ticketToBeAssigned.status = 'pending';
-        console.log("weselt");
-        ticketToBeAssigned.agentId = agent._id;
-        await ticketToBeAssigned.save();
-        break;
-      }
-    }
   }
 };
 
@@ -276,6 +257,9 @@ const userController = {
         return res.status(400).json({ message: "User doesn't exist in our system" });
       };
 
+      if (!user) {
+        return res.status(400).json({ message: "User doesn't exist in our system" });
+      };
       const trimmedCategory = category?.trim().toLowerCase();
 
       if (!trimmedCategory || !subCategory || !issueinfo) {
@@ -286,6 +270,9 @@ const userController = {
       if (!categories.some(category => category === trimmedCategory)) {
         return res.status(400).json({ message: "Category doesn't match" });
       };
+      if (!(trimmedCategory === "hardware") && !(trimmedCategory === "software") && !(trimmedCategory === "network")) {
+        return res.status(400).json({ message: "Category doesn't match " });
+      }
       // Create a new ticket
       const newTicket = new ticketModel({
         userid: userid,
@@ -296,9 +283,7 @@ const userController = {
       });
 
       await newTicket.save();
- 
       await AgentController.assignTicket(newTicket);
-
       res.status(201).json({ message: "Ticket created successfully" });
     }
     catch (error) {
@@ -363,13 +348,6 @@ const userController = {
       // Validate the rating (assuming a rating between 1 and 5)
       if (responserating < 1 || responserating > 5) {
         return res.status(400).json({ message: "Invalid rating. Please provide a rating between 0 and 5" });
-      }
-
-      const ticket = await ticketModel.findById(ticketId);
-
-      // Check if the ticket exists
-      if (!ticket) {
-        return res.status(404).json({ message: "Ticket not found" });
       }
 
       // Check if the ticket has already been rated

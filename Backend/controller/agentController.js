@@ -56,18 +56,17 @@ const agentController = {
       if (!ticketToBeClosed) {
         return res.status(400).json({ error: 'Ticket is not found in our system or it has been already closed' });
       };
-      const assignedAgentForTicket = await AgentModel.findById(ticketToBeClosed.agentid);
+      const assignedAgentForTicket = await AgentModel.findById(ticketToBeClosed.agentId);
       if (!assignedAgentForTicket) {
-        return res.status(400).json({ error: 'Agent is not found in our system' }, error.message);
+        return res.status(400).json({ error: 'Agent is not found in our system' });
       };
       const ticketCreationDate = new Date(ticketToBeClosed.createdAt);
       const currentDate = new Date();
-      // const timeDifferenceMs = currentDate - ticketCreationDate;
-      // const resolutionTime = timeDifferenceMs / (1000 * 60);
-      // ticketToBeClosed.resolutionTime = resolutionTime;
+      const timeDifferenceMs = currentDate - ticketCreationDate;
+      const resolutionTime = timeDifferenceMs / (1000 * 60);
+      ticketToBeClosed.resolutionTime = resolutionTime;
       ticketToBeClosed.status = 'closed';
       ticketToBeClosed.agentResponse = agentResponse;
-      ticketToBeClosed.responsedate = new Date();
       await ticketToBeClosed.save();
       assignedAgentForTicket.assignedTickets = assignedAgentForTicket.assignedTickets.filter(t => t !== ticketId);
       await assignedAgentForTicket.save();
@@ -76,7 +75,10 @@ const agentController = {
         oldestStaleTicket = await TicketModel.findOne({ _id: oldestStaleTicket[0]._id });
         await agentController.assignTicket(oldestStaleTicket);
       };
-      await sendOTPEmail(email);
+      const user = await userModel.findById(ticketToBeClosed.userid);
+      if (!user)
+        throw new Error('User not found');
+      await sendOTPEmail(user.email);
       res.status(200).json({ message: 'Ticket closed successfully', ticketToBeClosed });
     } catch (error) {
       console.error(error);
@@ -201,3 +203,12 @@ const findOldestHigherPriorityStaleTicket = async () => {
     },
   ]);
 }
+
+
+
+
+
+
+
+
+

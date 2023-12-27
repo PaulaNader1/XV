@@ -43,7 +43,7 @@ function App() {
           <Route path="/generateReport" element={<GenerateReport />} />
           <Route path="/generateAnalytics" element={<GenerateAnalytics />} />
           <Route path="/homemanager" element={<HomeManager />} />
-          <Route path="/tickettable" element={<TicketTable />} />
+          <Route path="/tickettable" element={<TicketsTable />} />
           <Route path="/homeagent" element={<HomeAgent />} />
       </Routes>
 
