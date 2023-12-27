@@ -1,5 +1,5 @@
 const userModel = require("../Models/userModel");
-const ticketModel = require("../Models/ticketModel");
+const TicketModel = require("../Models/ticketModel");
 const AgentModel = require("../Models/agentModel")
 const knowledgeBaseModel = require("../Models/knowledgeBaseModel");
 const jwt = require("jsonwebtoken");
@@ -43,86 +43,40 @@ const agentController = {
 
   closeTicket: async (req, res) => {
     try {
-      const { ticketId } = req.params.id;
-
-      const response = req.body;
-
+      const { ticketId } = req.params;
+      const { agentResponse } = req.body;
       if (!ticketId) {
-        return res.status(400).json({ error: 'Ticket ID is required' });
-      }
+        return res.status(400).json({ error: 'ticketId is required' });
+      };
 
-      const ticket = await ticketModel.findOne({ _id: ticketId });
-      const agentId = ticket.agentid;
-      const agent = await AgentModel.findOne({ agentId });
-
-      if (!ticket) {
-        return res.status(404).json({ error: 'Ticket not found' });
-      } else if (!(ticket.status) == "pending") {
-        return res.status(404).json({ error: "Cannot close open or closed ticket" });
-      } else {
-        ticket.status = "closed";
-        ticket.agentResponse = response;
-        ticket.responsedate = new Date();
-        await ticket.save();
-      }
-
-      const TicketAssignedToAgent = agent.assignedTickets.find(t => t._id === ticketId);
-
-      if (TicketAssignedToAgent) {
-        agent.assignedTickets = agent.assignedTickets.filter(t => t._id !== ticketId);
-        await agent.save();
-      }
-
-      /*const oldestStaleTicket = TicketModel.aggregate([
-        {
-          $match: {
-            status: 'open'
-          }
-        },
-        {
-          $addFields: {
-            priorityOrderIndex: {
-              $indexOfArray: [['high', 'medium', 'low'], '$priority']
-            }
-          }
-        },
-        {
-          $sort: {
-            priorityOrderIndex: 1,
-            createdAt: 1
-          }
-        },
-        {
-          $limit: 1
-        },
-      ]);
-
-      let tickets = [
-        { name: 'software', assignedAgents: [agentOne, agentTwo, agentThree] },
-
-        { name: 'hardware', assignedAgents: [agentTwo, agentThree, agentOne] },
-
-        { name: 'network', assignedAgents: [agentThree, agentOne, agentTwo] }
-
-      ];
-      if (oldestStaleTicket) {
-        assignTicket(oldestStaleTicket, tickets)
-      }*/
-
-      await sendOTPEmail(email);
-
-      res.status(200).json({ message: "ticket response email sent successfull" });
-
-      const ticketCreationDate = new Date(ticketId.date);
-      const currentDate = new Date(); // Get the current date
-
-      // Calculate the time difference in milliseconds
+      if (!agentResponse) {
+        return res.status(400).json({ error: 'agentResponse is required' });
+      };
+      const ticketToBeClosed = await TicketModel.findOne({ _id: ticketId });
+      if (!ticketToBeClosed) {
+        return res.status(400).json({ error: 'Ticket is not found in our system or it has been already closed' });
+      };
+      const assignedAgentForTicket = await AgentModel.findById(ticketToBeClosed.agentId);
+      if (!assignedAgentForTicket) {
+        return res.status(400).json({ error: 'Agent is not found in our system' });
+      };
+      const ticketCreationDate = new Date(ticketToBeClosed.createdAt);
+      const currentDate = new Date();
       const timeDifferenceMs = currentDate - ticketCreationDate;
-
-      // Convert the time difference to days (you can use hours, minutes, etc., as needed)
-      const agentResponse = timeDifferenceMs / (1000 * 60 * 60 * 24);
-
-      res.status(200).json({ message: 'Ticket closed successfully', ticket });
+      const resolutionTime = timeDifferenceMs / (1000 * 60);
+      ticketToBeClosed.resolutionTime = resolutionTime;
+      ticketToBeClosed.status = 'closed';
+      ticketToBeClosed.agentResponse = agentResponse;
+      await ticketToBeClosed.save();
+      assignedAgentForTicket.assignedTickets = assignedAgentForTicket.assignedTickets.filter(t => t !== ticketId);
+      await assignedAgentForTicket.save();
+      let oldestStaleTicket = await findOldestHigherPriorityStaleTicket();
+      if (oldestStaleTicket) {
+        oldestStaleTicket = await TicketModel.findOne({ _id: oldestStaleTicket[0]._id });
+        await agentController.assignTicket(oldestStaleTicket);
+      };
+      await sendOTPEmail(email);
+      res.status(200).json({ message: 'Ticket closed successfully', ticketToBeClosed });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
@@ -133,9 +87,12 @@ const agentController = {
     try {
       const { Category, subCategory } = req.body;
 
+      const lowercaseSubCategory = subCategory?.trim().toLowerCase();
+
+      const lowercaseCategory = Category?.trim().toLowerCase();
 
       // Use Mongoose to find documents based on the specified category
-      const result = await knowledgeBaseModel.find({ category: Category, subCategory: subCategory });
+      const result = await KnowledgeBaseModel.find({ category: lowercaseCategory, subCategory: lowercaseSubCategory });
 
       // Return the result
       return res.status(200).json({ data: result.answer });
@@ -145,6 +102,110 @@ const agentController = {
       return res.status(500).json({ message: 'Internal Server Error' });
     }
   },
+
+  getAllOpenedTickets: async (_, res) => {
+    try {
+      const allOpenedTickets = await TicketModel.find({ status: { $in: ['opened', 'pending'] } });
+      res.status(200).json(allOpenedTickets);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
+  changeTicketPriority: async (req, res) => {
+    try {
+      const ticketId = req.params.id;
+      const priority = req.params.priority;
+      if (!ticketId || !priority) {
+        throw new Error('Please provide the ticket that you want to update and the priority option');
+      };
+
+      const ticket = await TicketModel.findOne({ _id: ticketId });
+      if (!ticket) {
+        throw new Error('Ticket not found in our system');
+      };
+
+      ticket.priority = priority;
+      await ticket.save();
+
+      res.status(201).json(ticket);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
+  assignTicket: async (ticketToBeAssigned) => {
+    const agentOne = await AgentModel.findOne({ primaryCategory: "software" });
+    const agentTwo = await AgentModel.findOne({ primaryCategory: "hardware" });
+    const agentThree = await AgentModel.findOne({ primaryCategory: "network" });
+
+    if (!agentOne || !agentTwo || !agentThree) {
+      throw new Error('some or all agents are missing from our system');
+    };
+
+    if (ticketToBeAssigned.status !== 'opened') {
+      throw new Error('ticket is not opened');
+    };
+
+    let ticketsCategoryWithItsResponsibleAgents = [
+      { name: 'software', assignedAgents: [agentOne, agentTwo, agentThree] },
+
+      { name: 'hardware', assignedAgents: [agentTwo, agentThree, agentOne] },
+
+      { name: 'network', assignedAgents: [agentThree, agentOne, agentTwo] }
+
+    ];
+    let ticketCategoryWithItsResponsibleAgents = ticketsCategoryWithItsResponsibleAgents.find(t => t.name === ticketToBeAssigned.category);
+    if (ticketCategoryWithItsResponsibleAgents) {
+      for (let i = 0; i < ticketCategoryWithItsResponsibleAgents.assignedAgents.length; i++) {
+        let agent = ticketCategoryWithItsResponsibleAgents.assignedAgents[i];
+        if (agent.assignedTickets.length < 5) {
+          agent.assignedTickets.push(ticketToBeAssigned._id.toString());
+          await agent.save();
+          ticketToBeAssigned.status = 'pending';
+          ticketToBeAssigned.agentId = agent._id;
+          await ticketToBeAssigned.save();
+          break;
+        }
+      }
+    }
+  }
 };
 
 module.exports = agentController;
+
+
+const findOldestHigherPriorityStaleTicket = async () => {
+  return await TicketModel.aggregate([
+    {
+      $match: {
+        status: 'opened'
+      }
+    },
+    {
+      $addFields: {
+        priorityOrderIndex: {
+          $indexOfArray: [['high', 'medium', 'low'], '$priority']
+        }
+      }
+    },
+    {
+      $sort: {
+        priorityOrderIndex: 1,
+        createdAt: 1
+      }
+    },
+    {
+      $limit: 1
+    },
+  ]);
+}
+
+
+
+
+
+
+
+
+

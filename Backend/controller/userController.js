@@ -1,7 +1,10 @@
+const agentModel = require("../Models/agentModel");
 const userModel = require("../Models/userModel");
 const ticketModel = require("../Models/ticketModel");
 const AgentModel = require("../Models/agentModel")
 const knowledgeBaseModel = require("../Models/knowledgeBaseModel");
+const AgentController = require("./agentController");
+//const productModel = require("../Models/productModel");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const secretKey = process.env.SECRET_KEY;
@@ -39,28 +42,6 @@ const sendOTPEmail = async (email, otp) => {
     console.log('OTP email sent successfully');
   } catch (error) {
     console.error('Error sending OTP email:', error);
-  }
-};
-
-async function assignTicket(ticketToBeAssigned, ticketsCategoriesArr) {
-  console.log("weselt el method");
-  let ticketCategoryWithItsPriorityAgents = ticketsCategoriesArr.find(t => t.name === ticketToBeAssigned.category);
-  if (ticketCategoryWithItsPriorityAgents) {
-    for (let i = 0; i < 3; i++) {
-      let agent = ticketCategoryWithItsPriorityAgents.assignedAgents[i];
-      console.log(agent.assignedTickets.length);
-      if (agent.assignedTickets.length < 5) {
-        agent.assignedTickets.push(ticketToBeAssigned._id);
-        console.log("weselt ba3d el push");
-        await agent.save();
-        console.log("weselt");
-        ticketToBeAssigned.status = 'pending';
-        console.log("weselt");
-        ticketToBeAssigned.agentId = agent._id;
-        await ticketToBeAssigned.save();
-        break;
-      }
-    }
   }
 };
 
@@ -263,33 +244,27 @@ const userController = {
 
   createTicket: async (req, res) => {
     try {
-      const agentOne = await AgentModel.findOne({ primaryCategory: "Software" });
-      console.log(agentOne);
-      const agentTwo = await AgentModel.findOne({ primaryCategory: "Hardware" });
-      console.log(agentTwo);
-      const agentThree = await AgentModel.findOne({ primaryCategory: "Network" });
-      console.log(agentThree);
-      const highPriorityQueue = [];
-      const mediumPriorityQueue = [];
-      const lowPriorityQueue = [];
-
-      if (agentOne.assignedTickets.length === 5 && agentTwo.assignedTickets.length === 5 && agentThree.assignedTickets.length === 5) {
-        return res.status(400).json({ message: "All agents are busy" });
-      }
-
-
       const {
         issueinfo,
         category,
         subCategory,
-        priority,
       } = req.body;
+      const userid = req.user.userid;
+      const user = await userModel.findById(userid);
 
-      const trimmedPriority = priority.trim().toLowerCase();
-      const trimmedCategory = category.trim().toLowerCase();
-      console.log(trimmedCategory);
-      const userid = req.params.id;
+      if (!user) {
+        return res.status(400).json({ message: "User doesn't exist in our system" });
+      };
+      const trimmedCategory = category?.trim().toLowerCase();
 
+      if (!trimmedCategory || !subCategory || !issueinfo) {
+        return res.status(400).json({ message: "Please make sure that you pass all the required properties :-( category , subCategory and issueinfo)" });
+      };
+
+      const categories = ['hardware', 'software', 'network'];
+      if (!categories.some(category => category === trimmedCategory)) {
+        return res.status(400).json({ message: "Category doesn't match" });
+      };
       if (!(trimmedCategory === "hardware") && !(trimmedCategory === "software") && !(trimmedCategory === "network")) {
         return res.status(400).json({ message: "Category doesn't match " });
       }
@@ -299,45 +274,14 @@ const userController = {
         issueinfo,
         category: trimmedCategory,
         subCategory,
-        priority: trimmedPriority,
-        date: new Date(),
-        // responserating: null,
         status: "opened", // Assuming a new ticket is initially not resolved
       });
 
       await newTicket.save();
-      //Assigning ticket
-      switch (newTicket.priority) {
-        case "high":
-          highPriorityQueue.push(newTicket);
-          break;
-        case "medium":
-          mediumPriorityQueue.push(newTicket);
-          break;
-        case "low":
-          lowPriorityQueue.push(newTicket);
-          break;
-        default:
-          // Handle invalid priority (optional)
-          break;
-      }
-      let ticketPriorities = [
-        { name: 'software', assignedAgents: [agentOne, agentTwo, agentThree] },
-
-        { name: 'hardware', assignedAgents: [agentTwo, agentThree, agentOne] },
-
-        { name: 'network', assignedAgents: [agentThree, agentOne, agentTwo] }
-
-      ];
-      console.log("1");
-      assignTicket(newTicket, ticketPriorities);
-
-
-
-
-
+      await AgentController.assignTicket(newTicket);
       res.status(201).json({ message: "Ticket created successfully" });
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error creating ticket:", error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
@@ -399,13 +343,6 @@ const userController = {
       // Validate the rating (assuming a rating between 1 and 5)
       if (responserating < 1 || responserating > 5) {
         return res.status(400).json({ message: "Invalid rating. Please provide a rating between 0 and 5" });
-      }
-
-      const ticket = await ticketModel.findById(ticketId);
-
-      // Check if the ticket exists
-      if (!ticket) {
-        return res.status(404).json({ message: "Ticket not found" });
       }
 
       // Check if the ticket has already been rated

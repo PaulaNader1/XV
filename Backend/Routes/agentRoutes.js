@@ -1,11 +1,12 @@
-const express = require('express');
+const express = require("express");
+const agentController = require("../controller/agentController");
+const authorizationMiddleware = require('../Middleware/authorizationMiddleware')
 const router = express.Router();
-const agentController = require('../controller/agentController');
-const authorizationMiddleware = require("../Middleware/authorizationMiddleware");
 
-router.put('/tickets/:ticketId/close', authorizationMiddleware(['agent']), agentController.closeTicket);
+router.put('/closeTicket/:ticketId', authorizationMiddleware(['manager', 'admin', 'agent']), agentController.closeTicket);
 
+router.get("/getOpenedTickets", authorizationMiddleware(['manager', 'admin', 'agent']), agentController.getAllOpenedTickets);
+router.put("/changeTicketPriority/:id/:priority", authorizationMiddleware(['manager', 'admin', 'agent']), agentController.changeTicketPriority);
 router.get("/provideCwf", authorizationMiddleware(['user']), agentController.provideCwf);
-
 
 module.exports = router;
