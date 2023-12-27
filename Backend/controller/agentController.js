@@ -75,7 +75,10 @@ const agentController = {
         oldestStaleTicket = await TicketModel.findOne({ _id: oldestStaleTicket[0]._id });
         await agentController.assignTicket(oldestStaleTicket);
       };
-      await sendOTPEmail(email);
+      const user = await userModel.findById(ticketToBeClosed.userid);
+      if (!user)
+        throw new Error('User not found');
+      await sendOTPEmail(user.email);
       res.status(200).json({ message: 'Ticket closed successfully', ticketToBeClosed });
     } catch (error) {
       console.error(error);
@@ -92,7 +95,7 @@ const agentController = {
       const lowercaseCategory = Category?.trim().toLowerCase();
 
       // Use Mongoose to find documents based on the specified category
-      const result = await KnowledgeBaseModel.find({ category: lowercaseCategory, subCategory: lowercaseSubCategory });
+      const result = await knowledgeBaseModel.find({ category: lowercaseCategory, subCategory: lowercaseSubCategory });
 
       // Return the result
       return res.status(200).json({ data: result.answer });

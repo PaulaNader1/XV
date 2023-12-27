@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import AppNavBar from '../components/navbar';
 import '../stylesheets/TicketsTable.css';
 
 const bearerHeader = {
@@ -27,7 +28,7 @@ function TicketsTable() {
         if (!localStorage.getItem("token")) {
             navigate("/login");
         }
-        axios.put(`http://localhost:3000/api/v1/agents/changeTicketPriority/${ticketId}/${newPriority}`, { ...bearerHeader })
+        axios.put(`http://localhost:3000/api/v1/agents/changeTicketPriority/${ticketId}/${newPriority}`,{}, { ...bearerHeader })
             .then(_ => {
                 const updatedTickets = tickets.map(ticket =>
                     ticket._id === ticketId ? { ...ticket, priority: newPriority } : ticket

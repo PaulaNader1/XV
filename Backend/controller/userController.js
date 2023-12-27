@@ -244,7 +244,7 @@ const userController = {
   },
 
   createTicket: async (req, res) => {
-    try {
+    try {       
       const {
         issueinfo,
         category,
@@ -252,6 +252,10 @@ const userController = {
       } = req.body;
       const userid = req.user.userid;
       const user = await userModel.findById(userid);
+
+      if (!user) {
+        return res.status(400).json({ message: "User doesn't exist in our system" });
+      };
 
       if (!user) {
         return res.status(400).json({ message: "User doesn't exist in our system" });
