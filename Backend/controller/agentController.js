@@ -75,7 +75,10 @@ const agentController = {
         oldestStaleTicket = await TicketModel.findOne({ _id: oldestStaleTicket[0]._id });
         await agentController.assignTicket(oldestStaleTicket);
       };
-      await sendOTPEmail(email);
+      const user = await userModel.findById(ticketToBeClosed.userid);
+      if (!user)
+        throw new Error('User not found');
+      await sendOTPEmail(user.email);
       res.status(200).json({ message: 'Ticket closed successfully', ticketToBeClosed });
     } catch (error) {
       console.error(error);
