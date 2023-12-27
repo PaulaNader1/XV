@@ -16,7 +16,7 @@ import Signup from "./pages/register";
 import MFAPage from "./pages/mfaPage";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Ticket from "./pages/ticket";
-import TicketsTable from "./pages/TicketsTable";
+// import TicketsTable from "./pages/TicketsTable";
 import RateTicket from "./pages/rateTicket";
 import GetUsers from "./pages/getAllUsers";
 import GenerateReport from "./pages/generateReport";
