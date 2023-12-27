@@ -5,7 +5,7 @@ import "./App.css";
 
 // import '../public/styles/bootstrap.min.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Route  , Router, Routes } from "react-router-dom";
+import { Route, Router, Routes } from "react-router-dom";
 import Homepage from "./pages/HomePage";
 import HomeAdmin from './pages/HomeAdmin';
 import UpdateRole from "./pages/UpdateUserRole";
@@ -16,25 +16,27 @@ import Signup from "./pages/register";
 import MFAPage from "./pages/mfaPage";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Ticket from "./pages/ticket";
+import TicketsTable from "./pages/TicketsTable";
 function App() {
   return (
     <>
-        <Routes>
-          <Route path="/" element={<Login/>} />
-          <Route path="/signup" element={<Signup/>}/>
-          <Route path="/mfa" element={<MFAPage />} />
-          <Route path="/KnowledgeBase" element={<KnowledgeBase />} />
-          <Route path="/home" element={<Homepage />} />
-          <Route path="/ticket" element={<Ticket />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/homeadmin" element={<HomeAdmin />} />
-          <Route path="/update-role" element={<UpdateRole />} />
-          <Route path="/checkout" element={<Checkout />} />
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/mfa" element={<MFAPage />} />
+        <Route path="/KnowledgeBase" element={<KnowledgeBase />} />
+        <Route path="/home" element={<Homepage />} />
+        <Route path="/ticket" element={<Ticket />} />
+        <Route path="/tickets-dashboard" element={<TicketsTable />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/homeadmin" element={<HomeAdmin />} />
+        <Route path="/update-role" element={<UpdateRole />} />
+        <Route path="/checkout" element={<Checkout />} />
 
 
 
 
-        </Routes>
+      </Routes>
     </>
   );
 }
