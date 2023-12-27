@@ -5,7 +5,7 @@ import "./App.css";
 
 // import '../public/styles/bootstrap.min.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Route  , Router, Routes } from "react-router-dom";
+import { Route, Router, Routes } from "react-router-dom";
 import Homepage from "./pages/HomePage";
 import HomeAdmin from './pages/HomeAdmin';
 import UpdateRole from "./pages/UpdateUserRole";
@@ -16,12 +16,12 @@ import Signup from "./pages/register";
 import MFAPage from "./pages/mfaPage";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Ticket from "./pages/ticket";
+// import TicketsTable from "./pages/TicketsTable";
 import RateTicket from "./pages/rateTicket";
 import GetUsers from "./pages/getAllUsers";
 import GenerateReport from "./pages/generateReport";
 import GenerateAnalytics from "./pages/analytics";
 import HomeManager from "./pages/HomeManager";
-import TicketTable from "./pages/ticketstable";
 import HomeAgent from "./pages/HomeAgent";
 function App() {
   return (
@@ -42,10 +42,10 @@ function App() {
           <Route path="/generateReport" element={<GenerateReport />} />
           <Route path="/generateAnalytics" element={<GenerateAnalytics />} />
           <Route path="/homemanager" element={<HomeManager />} />
-          <Route path="/tickettable" element={<TicketTable />} />
+          <Route path="/tickettable" element={<TicketsTable />} />
           <Route path="/homeagent" element={<HomeAgent />} />
+      </Routes>
 
-        </Routes>
     </>
   );
 }
