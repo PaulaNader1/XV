@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controller/userController");
-const authorizationMiddleware=require('../Middleware/authorizationMiddleware')
+const authorizationMiddleware = require('../Middleware/authorizationMiddleware')
 
 
 // Get User by ID
@@ -14,7 +14,7 @@ router.put('/users/:id/update-username', authorizationMiddleware(['user']), user
 router.put('/users/:id/update-password', authorizationMiddleware(['user']), userController.updatePassword);
 
 // Create Ticket
-router.post('/users/:id/create-ticket', authorizationMiddleware(['user']), userController.createTicket);
+router.post('/create-ticket', authorizationMiddleware(['user']), userController.createTicket);
 
 // Get Tickets
 router.get('/tickets/:id', authorizationMiddleware(['user']), userController.getTickets);
