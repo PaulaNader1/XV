@@ -8,16 +8,16 @@ export default function AppNavBar() {
     <Container>
     <Nav>
       <Nav.Item>
-        <Link to="/homeadmin">Home      </Link>  
+        <Link to="/homeadmin">Home       .</Link>  
       </Nav.Item>
       <Nav.Item>
-        <Link to="/update-role">      update role</Link>
+        <Link to="/update-role">update role       .</Link>
       </Nav.Item>
       <Nav.Item>
-        <Link to="/ticket">     Tickets</Link>
+        <Link to="/deleteUser">Delete User     .</Link>
       </Nav.Item>
       <Nav.Item>
-        <Link to="/profile">     My Profile</Link>
+        <Link to="/getUsers">getUsers       .</Link>
       </Nav.Item>
     </Nav>
 

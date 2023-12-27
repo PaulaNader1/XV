@@ -7,7 +7,6 @@ router.put('/closeTicket/:ticketId', authorizationMiddleware(['manager', 'admin'
 
 router.get("/getOpenedTickets", authorizationMiddleware(['manager', 'admin', 'agent']), agentController.getAllOpenedTickets);
 router.put("/changeTicketPriority/:id/:priority", authorizationMiddleware(['manager', 'admin', 'agent']), agentController.changeTicketPriority);
-
-router.get("/provideCwf", agentController.provideCwf);
+router.get("/provideCwf", authorizationMiddleware(['user']), agentController.provideCwf);
 
 module.exports = router;

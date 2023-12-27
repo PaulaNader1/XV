@@ -45,28 +45,6 @@ const sendOTPEmail = async (email, otp) => {
   }
 };
 
-async function assignTicket(ticketToBeAssigned, ticketsCategoriesArr) {
-  console.log("weselt el method");
-  let ticketCategoryWithItsPriorityAgents = ticketsCategoriesArr.find(t => t.name === ticketToBeAssigned.category);
-  if (ticketCategoryWithItsPriorityAgents) {
-    for (let i = 0; i < 3; i++) {
-      let agent = ticketCategoryWithItsPriorityAgents.assignedAgents[i];
-      console.log(agent.assignedTickets.length);
-      if (agent.assignedTickets.length < 5) {
-        agent.assignedTickets.push(ticketToBeAssigned._id);
-        console.log("weselt ba3d el push");
-        await agent.save();
-        console.log("weselt");
-        ticketToBeAssigned.status = 'pending';
-        console.log("weselt");
-        ticketToBeAssigned.agentId = agent._id;
-        await ticketToBeAssigned.save();
-        break;
-      }
-    }
-  }
-};
-
 const userController = {
   register: async (req, res) => {
     try {
@@ -241,9 +219,11 @@ const userController = {
 
   getTickets: async (req, res) => {
     try {
-      const { userid } = req.params;
-      const tickets = await ticketModel.find({ userid: userid });
+      const { id } = req.params;
+      const tickets = await ticketModel.find({ userid: id });
+      console.log(id);
       console.log("works");
+      console.log(tickets);
       res.status(200).json({ tickets });
     } catch (error) {
       console.error("Error getting tickets:", error);
@@ -254,9 +234,8 @@ const userController = {
   getUser: async (req, res) => {
     try {
       const { userid } = req.params;
-      const user = await userModel.findOne({userid });
-      const username = user.username;
-      res.status(200).json({  username});
+      const user = await userModel.findOne({ userid });
+      res.status(200).json({ user });
     } catch (error) {
       console.error("Error getting user info:", error);
       res.status(500).json({ message: "Server error" });
@@ -265,33 +244,17 @@ const userController = {
 
   createTicket: async (req, res) => {
     try {
-      const agentOne = await AgentModel.findOne({ primaryCategory: "Software" });
-      console.log(agentOne);
-      const agentTwo = await AgentModel.findOne({ primaryCategory: "Hardware" });
-      console.log(agentTwo);
-      const agentThree = await AgentModel.findOne({ primaryCategory: "Network" });
-      console.log(agentThree);
-      const highPriorityQueue = [];
-      const mediumPriorityQueue = [];
-      const lowPriorityQueue = [];
-
-      if (agentOne.assignedTickets.length === 5 && agentTwo.assignedTickets.length === 5 && agentThree.assignedTickets.length === 5) {
-        return res.status(400).json({ message: "All agents are busy" });
-      }
-
-      
       const {
         issueinfo,
         category,
         subCategory,
       } = req.body;
-      // const userid = req.user.userid;
-      // const user = await userModel.findById(userid);
+      const userid = req.user.userid;
+      const user = await userModel.findById(userid);
 
-      // if (!user) {
-      //   return res.status(400).json({ message: "User doesn't exist in our system" });
-      // };
-
+      if (!user) {
+        return res.status(400).json({ message: "User doesn't exist in our system" });
+      };
       const trimmedCategory = category?.trim().toLowerCase();
 
       if (!trimmedCategory || !subCategory || !issueinfo) {
@@ -302,9 +265,12 @@ const userController = {
       if (!categories.some(category => category === trimmedCategory)) {
         return res.status(400).json({ message: "Category doesn't match" });
       };
+      if (!(trimmedCategory === "hardware") && !(trimmedCategory === "software") && !(trimmedCategory === "network")) {
+        return res.status(400).json({ message: "Category doesn't match " });
+      }
       // Create a new ticket
       const newTicket = new ticketModel({
-        userid: "6589c0d876ab376503de9e8f",
+        userid,
         issueinfo,
         category: trimmedCategory,
         subCategory,
@@ -312,9 +278,7 @@ const userController = {
       });
 
       await newTicket.save();
- 
       await AgentController.assignTicket(newTicket);
-
       res.status(201).json({ message: "Ticket created successfully" });
     }
     catch (error) {
@@ -326,8 +290,9 @@ const userController = {
   getAllKnowledgeBase: async (req, res) => {
     try {
       const knowledgeBaseEntries = await knowledgeBaseModel.find();
+      console.log(knowledgeBaseEntries);
       console.log("works");
-      res.status(200).json({message: "knowledgebase entries:", knowledgeBaseEntries });
+      res.status(200).json({ message: "knowledgebase entries:", knowledgeBaseEntries });
     } catch (error) {
       console.error("Error getting Knowledge Base entries:", error);
       res.status(500).json({ message: "Server error" });
@@ -344,7 +309,7 @@ const userController = {
       res.status(500).json({ message: "Server error" });
     }
   },
-  
+
 
   getKnowledgeBaseBySubcategory: async (req, res) => {
     try {
@@ -356,7 +321,7 @@ const userController = {
       res.status(500).json({ message: "Server error" });
     }
   },
-  
+
 
   getKnowledgeBaseByTitle: async (req, res) => {
     try {
