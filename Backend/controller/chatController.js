@@ -5,19 +5,39 @@ const agentModel = require("../Models/agentModel");
 const chatController = {
   determineAgent: async (req, res) => {
     try {
-      const { primary_category} = req.body;
-      const agent = await agentModel.findOne({ primary_category});
+      const { primary_category } = req.body;
+      const agent = await agentModel.findOne({ primaryCategory: primary_category });
 
       if (!agent) {
-        return res.status(404).json({ error: "No agent found for the specified category and sub-category" });
+        return res.status(404).json({ error: "No agent found for the specified category" });
       }
 
-      return agent;
+      if (agent.noOfTickets <= 4) {
+        return res.status(200).json(agent);
+      } else {
+        return res.status(404).json({ error: "No available agent for the specified category" });
+      }
     } catch (error) {
       res.status(500).json({ error: `Error determining agent: ${error.message}` });
       return null; // Or throw an error if you want to handle it differently
     }
   },
+  
+  // determineAgent: async (req, res) => {
+  //   try {
+  //     const { primary_category} = req.body;
+  //     const agent = await agentModel.findOne({ primary_category});
+
+  //     if (!agent) {
+  //       return res.status(404).json({ error: "No agent found for the specified category and sub-category" });
+  //     }
+
+  //     return agent;
+  //   } catch (error) {
+  //     res.status(500).json({ error: `Error determining agent: ${error.message}` });
+  //     return null; // Or throw an error if you want to handle it differently
+  //   }
+  // },
 
   createChat: async (req, res) => {
     try {

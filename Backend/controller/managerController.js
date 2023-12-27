@@ -63,10 +63,7 @@ const managerController = {
             const ticketdate = new Date(ticket.date);
             console.log('Parsed Ticketdate:', ticketdate);
 
-            // const responsedate = new Date(ticket.responsedate);
-            // const ticketdate = new Date(ticket.date);
             if (ticketStatus == "opened" || ticketStatus == "pending") {
-                console.log("welnabyyyyyyyy");
                 const ticketdate = ticket.date;
                 return res.status(200).json({
                     ticketdate,

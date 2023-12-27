@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 
 const ticketModel = new mongoose.Schema({
     userid: { type: String },
-    // ticketId : {type: String},
     issueinfo: { type: String, required: true },
     agentResponse:{type: String},
     status:{type: String} ,

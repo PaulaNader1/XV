@@ -14,7 +14,7 @@ export default function AppNavBar() {
         <Link to="/KnowledgeBase">      knowledgeBase</Link>
       </Nav.Item>
       <Nav.Item>
-        <Link to="/ticket">     Tickets</Link>
+        <Link to="/generateAnalytics">     generateAnalytics</Link>
       </Nav.Item>
       <Nav.Item>
         <Link to="/profile">     My Profile</Link>

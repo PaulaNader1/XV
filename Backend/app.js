@@ -91,33 +91,12 @@ app.use(function (req, res, next) {
 // const io = socketIO(server)
 // chatController.initializeSocketIO(server); // Add this line
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
-app.use(
-  cors({
-    origin: process.env.ORIGIN,
-    methods: ['GET', 'POST', 'DELETE', 'PUT'],
-    credentials: true,
-  })
-);
 
-app.use('/api/v1', authRouter);
-// app.use(authenticationMiddleware);
-app.use('/api/v1/users', userRouter);
-app.use('/api/v1/admins', adminRouter);
-app.use('/api/v1/chats', chatRouter); // Add this line
 
-// mongoose
-//   .connect(db_url, connectionOptions)
-//   .then(() => console.log('mongoDB connected'))
-//   .catch((e) => {
-//     console.log(e);
-//   });
 
-app.use(function (req, res, next) {
-  return res.status(404).send('404');
-});
+
+
 
 const PORT = process.env.PORT || 3000;
 

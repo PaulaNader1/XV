@@ -16,6 +16,10 @@ import Signup from "./pages/register";
 import MFAPage from "./pages/mfaPage";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Ticket from "./pages/ticket";
+import React from 'react';
+import GenerateReport from './pages/generateReport';
+import GenerateAnalytics from './pages/generateAnalytics';
+
 function App() {
   return (
     <>
@@ -30,10 +34,8 @@ function App() {
           <Route path="/homeadmin" element={<HomeAdmin />} />
           <Route path="/update-role" element={<UpdateRole />} />
           <Route path="/checkout" element={<Checkout />} />
-
-
-
-
+          <Route path="/generateReport" element={<GenerateReport />} />
+          <Route path="/generateAnalytics" element={<GenerateAnalytics />} />
         </Routes>
     </>
   );
