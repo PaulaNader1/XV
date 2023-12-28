@@ -23,6 +23,7 @@ const RateTicketPage = () => {
                 },
             });
             console.log(response.data.tickets);
+            setSelectedTicket(response.data?.tickets[0]?._id ?? '');
             setTickets(response.data.tickets);
         } catch (error) {
             console.error('Error fetching tickets:', error);

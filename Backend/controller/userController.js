@@ -1,10 +1,7 @@
-const agentModel = require("../Models/agentModel");
 const userModel = require("../Models/userModel");
 const ticketModel = require("../Models/ticketModel");
-const AgentModel = require("../Models/agentModel")
 const AgentController = require("./agentController");
 const knowledgeBaseModel = require("../Models/knowledgeBaseModel");
-const AgentController = require("./agentController");
 //const productModel = require("../Models/productModel");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
@@ -169,22 +166,6 @@ const userController = {
       res.status(500).json({ message: "Server error" });
     }
   },
-  // getAllUsers: async (req, res) => {
-  //   try {
-  //     const users = await userModel.find();
-  //     return res.status(200).json(users);
-  //   } catch (e) {
-  //     return res.status(500).json({ message: e.message });
-  //   }
-  // },
-  // getUser: async (req, res) => {
-  //   try {
-  //     const user = await userModel.findById(req.params.id);
-  //     return res.status(200).json(user);
-  //   } catch (error) {
-  //     return res.status(500).json({ message: error.message });
-  //   }
-  // },
   updateUserName: async (req, res) => {
     try {
       const user = await userModel.findByIdAndUpdate(
@@ -244,7 +225,7 @@ const userController = {
   },
 
   createTicket: async (req, res) => {
-    try {       
+    try {
       const {
         issueinfo,
         category,
@@ -252,10 +233,6 @@ const userController = {
       } = req.body;
       const userid = req.user.userid;
       const user = await userModel.findById(userid);
-
-      if (!user) {
-        return res.status(400).json({ message: "User doesn't exist in our system" });
-      };
 
       if (!user) {
         return res.status(400).json({ message: "User doesn't exist in our system" });
@@ -350,8 +327,10 @@ const userController = {
         return res.status(400).json({ message: "Invalid rating. Please provide a rating between 0 and 5" });
       }
 
+      const ticket = await ticketModel.findOne({ _id: ticketId });
+
       // Check if the ticket has already been rated
-      if (ticket.responserating !== 0) {
+      if (ticket.responserating) {
         return res.status(400).json({ message: "Ticket has already been rated" });
       }
       ticket.responserating = responserating;

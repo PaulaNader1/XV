@@ -70,7 +70,7 @@ const adminController = {
                     username: user.username,
                     password: user.password,
                     email : user.email,
-                    primaryCategory: primaryCategory // Assign the provided primaryCategory
+                    primaryCategory: primaryCategory.trim().toLowerCase() // Assign the provided primaryCategory
                 });
     
                 const savedAgent = await newAgent.save();
