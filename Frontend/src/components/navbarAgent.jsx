@@ -11,7 +11,7 @@ export default function AppNavBar() {
         <Link to="/homeagent">Home       .</Link>  
       </Nav.Item>
       <Nav.Item>
-        <Link to="/tickettable">Process Tickets       .</Link>
+        <Link to="/ticketsdashboard">Process Tickets       .</Link>
       </Nav.Item>
       {/* <Nav.Item>
         <Link to="/deleteUser">Delete User     .</Link>

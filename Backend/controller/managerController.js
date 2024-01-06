@@ -66,17 +66,16 @@ const managerController = {
             // const responsedate = new Date(ticket.responsedate);
             // const ticketdate = new Date(ticket.date);
             if (ticketStatus == "opened" || ticketStatus == "pending") {
-                console.log("welnabyyyyyyyy");
                 const ticketdate = ticket.date;
                 return res.status(200).json({
                     ticketdate,
                     ticketStatus
                 });
             } else {
-                const agentid = ticket.agentid;
-                const agent = await agentModel.find({ _id: agentid });
+                const agentid = ticket.agentId;
+                const agent = await agentModel.findOne({ _id: agentid });
                 const agentemail = agent.email;
-                const responsetime = ticket.responsedate - ticket.date;
+                const responsetime = ticket.resolutionTime;
                 const rating = ticket.responserating;
                 return res.status(200).json({
                     ticketStatus,

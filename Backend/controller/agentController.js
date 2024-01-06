@@ -71,7 +71,7 @@ const agentController = {
       assignedAgentForTicket.assignedTickets = assignedAgentForTicket.assignedTickets.filter(t => t !== ticketId);
       await assignedAgentForTicket.save();
       let oldestStaleTicket = await findOldestHigherPriorityStaleTicket();
-      if (oldestStaleTicket) {
+      if (oldestStaleTicket && oldestStaleTicket.length > 0) {
         oldestStaleTicket = await TicketModel.findOne({ _id: oldestStaleTicket[0]._id });
         await agentController.assignTicket(oldestStaleTicket);
       };

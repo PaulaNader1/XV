@@ -28,8 +28,7 @@ const TicketPage = () => {
 
     const createTicket = async () => {
         try {
-            const uid = localStorage.getItem("userId");
-            await axios.post(`${backend_url}/users/${uid}/create-ticket`, {
+            await axios.post(`${backend_url}/create-ticket`, {
                 title,
                 category,
                 subCategory: subcategory,
@@ -115,6 +114,7 @@ const TicketPage = () => {
                     {/* Add options based on the selected category */}
                     {category === 'Hardware' && (
                         <>
+                            <option value="">Select Sub Category</option>
                             <option value="Desktops">Desktops</option>
                             <option value="Laptops">Laptops</option>
                             <option value="Printers">Printers</option>
@@ -124,6 +124,7 @@ const TicketPage = () => {
                     )}
                     {category === 'Software' && (
                         <>
+                            <option value="">Select Sub Category</option>
                             <option value="Operating system">Operating system</option>
                             <option value="Application software">Application software</option>
                             <option value="Custom software">Custom software</option>
@@ -132,6 +133,7 @@ const TicketPage = () => {
                     )}
                     {category === 'Network' && (
                         <>
+                            <option value="">Select Sub Category</option>
                             <option value="Email issues">Email issues</option>
                             <option value="Internet connection problems">Internet connection problems</option>
                             <option value="Website errors">Website errors</option>
