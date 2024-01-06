@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import AppNavBar from '../components/navbar';
 import '../stylesheets/TicketsTable.css';
 
 const bearerHeader = {
